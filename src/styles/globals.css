@@ -1,0 +1,195 @@
+/* Tailwind v4 entry point: fonts, design tokens, Tailwind theme mapping and global rules. */
+@import "tailwindcss";
+@import "./fonts.css";
+@import "./tokens.css";
+
+/* `dark:` follows the class set on <html>, never prefers-color-scheme (Req 5.1). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * `pre-animate:` styles apply only while JS is running animations (html.js) and motion is not
+ * reduced, so reduced motion, failed scripts and the 4 s fail-safe all show the final state (D2).
+ */
+@custom-variant pre-animate (html.js:not([data-motion="reduced"]) &);
+
+/* Utilities such as `bg-base`, `text-accent-cyan` and `shadow-glow-cyan` resolve to the tokens. */
+@theme inline {
+  --color-base: var(--color-base);
+  --color-surface: var(--color-surface);
+  --color-surface-2: var(--color-surface-2);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-accent-cyan: var(--color-cyan);
+  --color-accent-cyan-text: var(--color-cyan-text);
+  --color-accent-violet: var(--color-violet);
+  --color-accent-violet-text: var(--color-violet-text);
+  --color-accent-green: var(--color-green);
+  --color-accent-green-text: var(--color-green-text);
+  --color-maroon: var(--color-maroon);
+  --color-maroon-ring: var(--color-maroon-ring);
+  --color-focus: var(--color-focus);
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+  --font-sans: var(--font-body);
+
+  --text-hero: var(--text-hero);
+  --text-h2: var(--text-h2);
+  --text-body: var(--text-body);
+  --text-body--line-height: var(--text-body--line-height);
+
+  --shadow-glow-cyan: var(--glow-cyan);
+  --shadow-glow-violet: var(--glow-violet);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-pill: var(--radius-pill);
+  --radius-card: var(--radius-lg);
+}
+
+/* Glassmorphism card. Allowlisted elements only (Req 5.11). */
+@utility glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+/* Gradient hairline border (masked pseudo-element) plus cyan glow. Allowlisted elements only. */
+@utility glow-border {
+  position: relative;
+  box-shadow: var(--glow-cyan);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gradient-accent);
+    /* The build (Lightning CSS) adds the -webkit-mask / -webkit-mask-composite: xor fallback. */
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+}
+
+@layer base {
+  html {
+    /* Anchored sections and focused elements stay clear of the sticky Navbar (Req 28.5). */
+    scroll-padding-top: var(--nav-h);
+    background-color: var(--color-base);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: var(--text-body--line-height);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--color-base);
+    color: var(--color-text);
+    font-size: var(--text-body);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+  }
+
+  /* 2 px focus ring with 2 px offset, >= 3:1 against base in both Themes (Req 28.5). */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  /* Pre-animation hiding (D2): only while JS animates and motion is not reduced. */
+  html.js:not([data-motion="reduced"]) [data-reveal]:not([data-revealed]) {
+    opacity: 0;
+  }
+
+  /*
+   * Themed crossfade (Req 5.2): while ThemeProvider switches the Theme it sets
+   * html.theme-switching for --duration-theme, so colors swap within 300 ms. Declared before the
+   * reduced-motion rules, which win on equal specificity and keep their own crossfade limits.
+   */
+  html.theme-switching,
+  html.theme-switching *,
+  html.theme-switching *::before,
+  html.theme-switching *::after {
+    transition-property:
+      color, background-color, border-color, outline-color, text-decoration-color, fill, stroke,
+      box-shadow !important;
+    transition-duration: var(--duration-theme) !important;
+    transition-timing-function: ease !important;
+    transition-delay: 0s !important;
+  }
+  /*
+   * Reduced motion (Req 26.2): no keyframe animations; remaining transitions are limited to
+   * opacity and color crossfades of <= 300 ms, so translate/scale/rotate changes are instant.
+   */
+  html[data-motion="reduced"] {
+    scroll-behavior: auto !important;
+  }
+
+  html[data-motion="reduced"] *,
+  html[data-motion="reduced"] *::before,
+  html[data-motion="reduced"] *::after {
+    animation: none !important;
+    transition-property: opacity, color, background-color, border-color !important;
+    transition-duration: var(--duration-reduced) !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /*
+   * SQL_Ticker (Req 6.7, 6.8): two identical copies of the snippet track scroll continuously, so
+   * translating by exactly 50% loops seamlessly. `animation-duration` and `animation-play-state`
+   * are set inline per track (speed from config, paused while the tab is hidden). Under reduced
+   * motion the rule above removes the animation, leaving a static ticker frame (Req 6.11).
+   */
+  @keyframes sql-ticker-x {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  @keyframes sql-ticker-y {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(0, -50%, 0);
+    }
+  }
+
+  .sql-ticker-x {
+    animation: sql-ticker-x linear infinite;
+  }
+
+  .sql-ticker-y {
+    animation: sql-ticker-y linear infinite;
+  }
+}

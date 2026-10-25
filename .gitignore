@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Owner-maintained denylist of real employer system names (never commit)
+.denylist
+
+# Lighthouse CI output
+.lighthouseci/
+lighthouse-reports/
+lhci_reports/
+
+# Test and coverage output
+coverage/
+playwright-report/
+test-results/
+
+# Local env and editor files
+.env.local
+.env.*.local
+*.log
+.DS_Store

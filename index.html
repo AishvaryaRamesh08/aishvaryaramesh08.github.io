@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      // Pre-paint Theme/motion (Req 5.1, 5.4, 5.5). Mirrors src/lib/theme.ts. Keep first in <head>.
+      (function () {
+        var d = document.documentElement, t = "dark";
+        try { var s = localStorage.getItem("theme"); if (s === "light" || s === "dark") t = s; } catch (e) {}
+        d.classList.add(t, "js"); d.style.colorScheme = t;
+        try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) d.dataset.motion = "reduced"; } catch (e) {}
+        setTimeout(function () { if (!window.__hydrated) d.classList.remove("js"); }, 4000);
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aishvarya Ramesh · Data Engineer</title>
+    <!-- LCP fonts (Req 30.7). Public-dir paths: Vite prefixes them with the Base_Path at build. -->
+    <link rel="preload" href="/fonts/space-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

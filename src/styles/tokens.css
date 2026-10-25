@@ -1,0 +1,108 @@
+/*
+ * Design tokens (design.md "Design tokens and theming").
+ *
+ * The dark Theme is the default: it applies to `:root` with no class (first visit, no JS) and to
+ * `html.dark`. `html.light` overrides only the theme-dependent values. `prefers-color-scheme` is
+ * never consulted (Req 5.1). These declarations are unlayered on purpose, so they win over the
+ * Tailwind `@layer theme` defaults and the `@theme inline` mapping in globals.css.
+ */
+
+:root,
+:root.dark {
+  color-scheme: dark;
+
+  /* ---- Color (Req 5.1, 5.6, 28.1, 28.2) ---- */
+  --color-base: #0a0e1a;
+  --color-surface: #10172a;
+  --color-surface-2: #162036;
+  --color-text: #e6edf7;
+  --color-text-muted: #a3b1c6;
+  --color-border: #26324d; /* decorative hairlines */
+  --color-border-strong: #5b6b8a; /* control boundaries, >= 3:1 */
+  --color-cyan: #22d3ee; /* graphics */
+  --color-cyan-text: #22d3ee; /* text, >= 4.5:1 */
+  --color-violet: #8b5cf6;
+  --color-violet-text: #a78bfa;
+  --color-green: #39ff88;
+  --color-green-text: #39ff88; /* terminal output */
+  --color-maroon: #7a1f33; /* Journey "current" marker fill (Req 5.12) */
+  --color-maroon-ring: #a78bfa; /* Journey "current" marker ring */
+  --color-focus: #22d3ee; /* focus ring (Req 28.5) */
+
+  /* ---- Glass ---- */
+  --glass-bg: rgb(16 23 42 / 0.62);
+  --glass-border: rgb(255 255 255 / 0.08);
+}
+
+:root.light {
+  color-scheme: light;
+
+  --color-base: #f5f7fb;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef2f8;
+  --color-text: #0b1220;
+  --color-text-muted: #475569;
+  --color-border: #cbd5e1;
+  --color-border-strong: #64748b;
+  --color-cyan: #0891b2;
+  --color-cyan-text: #0e7490;
+  --color-violet: #7c3aed;
+  --color-violet-text: #6d28d9;
+  --color-green: #16a34a;
+  --color-green-text: #047857;
+  --color-maroon: #500000;
+  --color-maroon-ring: #6d28d9;
+  --color-focus: #0e7490;
+
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(15 23 42 / 0.08);
+}
+
+/* Theme-independent tokens. */
+:root {
+  /* ---- Typography (Req 5.7); each web font is followed by its metric-adjusted fallback ---- */
+  --font-heading: "Space Grotesk", "Space Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+  --text-hero: clamp(2.25rem, 5vw, 4rem);
+  --text-h2: clamp(1.75rem, 3.5vw, 2.75rem);
+  /* Design value `1rem/1.65`, split into size and line height (Tailwind `--text-*--line-height`). */
+  --text-body: 1rem;
+  --text-body--line-height: 1.65;
+
+  /* ---- Spacing (Tailwind's 4 px base scale is kept) ---- */
+  --section-y: clamp(4rem, 8vw, 8rem);
+  --container: 75rem;
+  --gutter: clamp(1rem, 4vw, 2rem);
+  --nav-h: 4rem;
+
+  /* ---- Radii ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ---- Glow and gradient (allowlisted elements only, Req 5.11) ---- */
+  --glow-cyan: 0 0 24px rgb(34 211 238 / 0.35);
+  --glow-violet: 0 0 24px rgb(139 92 246 / 0.35);
+  --gradient-accent: linear-gradient(135deg, var(--color-cyan), var(--color-violet));
+
+  /* ---- Glass ---- */
+  --glass-blur: 12px;
+
+  /* ---- Z-index ---- */
+  --z-bg: 0;
+  --z-content: 10;
+  --z-raised: 20;
+  --z-nav: 40;
+  --z-overlay: 50; /* Mobile_Menu, lightboxes */
+  --z-tooltip: 55;
+  --z-cursor: 60;
+  --z-skip: 70;
+
+  /* ---- Motion ---- */
+  --duration-reduced: 200ms; /* reduced-motion crossfade, <= 300 ms (Req 26.2) */
+  --duration-theme: 200ms; /* Theme switch crossfade, <= 300 ms (Req 5.2); THEME_TRANSITION_MS */
+}
