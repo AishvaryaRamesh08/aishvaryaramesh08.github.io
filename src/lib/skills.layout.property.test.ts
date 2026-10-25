@@ -48,6 +48,20 @@ function oracleMemberships(cfg: SkillsConfig): string[] {
 }
 
 describe("Property 5: One node per skill", () => {
+  it("extends the graph canvas when a shared-skill group exceeds the panel height", () => {
+    const sharedSkills: SkillId[] = ["ssis", "dash", "rag", "bigquery", "data-warehousing"];
+    const cfg: SkillsConfig = {
+      skills: [],
+      clusters: [
+        { id: "cloud", name: "", skills: sharedSkills },
+        { id: "cloud", name: "", skills: sharedSkills },
+      ],
+    };
+
+    const layout = buildConstellationLayout(cfg, "desktop");
+    expect(Math.max(...layout.nodes.map((node) => node.y))).toBeLessThanOrEqual(layout.height);
+  });
+
   it("has exactly one node per distinct skill id and one edge per (skill, cluster) membership", () => {
     fc.assert(
       fc.property(arbScenario, ({ cfg, viewport }) => {

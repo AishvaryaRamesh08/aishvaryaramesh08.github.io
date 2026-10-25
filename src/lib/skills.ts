@@ -261,26 +261,32 @@ function graphLayout(cfg: SkillsConfig, viewport: "desktop" | "tablet"): Constel
     });
   }
 
-  // Unclustered skills trail below the cluster panels in rows so they remain within the chart.
+  const clusterContentBottom = Math.max(panelHeight, ...[...placed.values()].map(({ y }) => y));
+
+  // Unclustered skills trail below the cluster content in rows so they remain within the chart.
   const loose = members.filter((s) => s.clusters.length === 0);
   const looseColumns = Math.max(1, Math.floor((metrics.width - 48) / 180));
   const looseRows = Math.ceil(loose.length / looseColumns);
+  const looseTop = clusterContentBottom + PANEL_GAP;
   loose.forEach((s, k) => {
     const row = Math.floor(k / looseColumns);
     const column = k % looseColumns;
     const rowCount = Math.min(looseColumns, loose.length - row * looseColumns);
     placed.set(s.id, {
       x: (metrics.width * (column + 1)) / (rowCount + 1),
-      y: panelHeight + PANEL_GAP + row * NODE_ROW_HEIGHT,
+      y: looseTop + row * NODE_ROW_HEIGHT,
     });
   });
 
+  const contentBottom = Math.max(panelHeight, ...[...placed.values()].map(({ y }) => y));
   return finishLayout(
     viewport,
     "graph",
     {
       width: metrics.width,
-      height: panelHeight + (loose.length > 0 ? PANEL_GAP + looseRows * NODE_ROW_HEIGHT : 0),
+      height: loose.length > 0
+        ? looseTop + looseRows * NODE_ROW_HEIGHT
+        : Math.max(panelHeight, contentBottom + PANEL_BOTTOM),
     },
     hubs,
     placed,
