@@ -5,7 +5,7 @@
 //   - a hidden <symbol> set,
 //   - 2–3 parallax SVG depth layers (icons via <use>, crow's-foot relationship lines),
 //   - one <canvas> driven by a dynamically-imported engine (packets, pulses, neural edges),
-//   - the SQL_Ticker side-gutter lanes.
+//   - a subtle ERD-style icon scene, kept clear of the center text area.
 //
 // The SVG layers are rendered deterministically (`buildScene` is pure, no `window`/`Date`), so the
 // prerendered HTML and the hydration pass agree and there is no mismatch — only the canvas engine
@@ -21,10 +21,9 @@ import { BackgroundSymbols, iconSymbolId } from "./BackgroundIcons";
 import type { CanvasEngine } from "./engine/canvasEngine";
 import { crowsFootPath, toSvgPoints, trimPolyline, wrappedLayerOffsets } from "./geometry";
 import { buildScene, MOBILE_MEDIA_QUERY, viewportClassFor, type RelationshipLine, type Scene, type SceneIcon } from "./scene";
-import { SqlTickerGutters } from "./SqlTicker";
 
-/** Sections whose first appearance reveals the Neural_Layer (`#intro` or anything after it). */
-const NEURAL_REVEAL_SELECTOR = "#intro, #work, #skills, #certifications, #terminal, #journey, #built-with-ai, #analysis, #story, #contact, #site-footer";
+/** Sections whose first appearance reveals the Neural_Layer (`#home` or anything after it). */
+const NEURAL_REVEAL_SELECTOR = "#home, #work, #skills, #journey, #story, #contact, #site-footer";
 
 /** Runs `cb` once the browser is idle after first paint; falls back to a macrotask. */
 function onIdle(cb: () => void): () => void {
@@ -138,7 +137,7 @@ function SvgScene({ scene }: { scene: Scene }) {
 /**
  * Canvas + engine. The engine chunk is imported after first paint; the scene is rebuilt when the
  * viewport crosses the 768 px boundary (passed to `engine.setScene`), and the Neural_Layer is
- * revealed the first time `#intro` or a later section intersects the viewport.
+ * revealed the first time `#home` or a later section intersects the viewport.
  */
 function CanvasScene({ scene }: { scene: Scene }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -234,11 +233,14 @@ function BackgroundScene() {
     [mobile],
   );
   return (
-    <div aria-hidden="true" style={LAYER_STYLE} className="pointer-events-none fixed inset-0 overflow-hidden select-none">
+    <div
+      aria-hidden="true"
+      style={LAYER_STYLE}
+      className="background-scene pointer-events-none fixed inset-0 overflow-hidden select-none"
+    >
       <BackgroundSymbols />
       <SvgScene scene={scene} />
       <CanvasScene scene={scene} />
-      <SqlTickerGutters />
     </div>
   );
 }

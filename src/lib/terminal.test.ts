@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { certifications } from "../data/certifications";
-import { projects } from "../data/projects";
 import { terminal } from "../data/terminal";
+import { work } from "../data/work";
 import type { TerminalEntry } from "../data/types";
 import {
   TERMINAL_COMMANDS,
@@ -9,17 +9,16 @@ import {
   historyReducer,
   normalizeCommand,
   runCommand,
-  type TerminalAction,
-  type TerminalContext,
 } from "./terminal";
 
-const outputOf = (input: string, c: TerminalContext = ctx): readonly string[] => {
-  const action = runCommand(input, c);
+const outputOf = (input: string) => {
+  const action = runCommand(input, ctx);
   if (action.type !== "append") throw new Error(`expected append, got ${action.type}`);
   return action.output;
 };
 
-const append = (command: string): TerminalAction => ({ type: "append", command, output: [command] });
+const textOf = (input: string) =>
+  outputOf(input).map((line) => (typeof line === "string" ? line : line.text));
 
 describe("normalizeCommand", () => {
   it("trims and lower-cases", () => {
@@ -29,92 +28,119 @@ describe("normalizeCommand", () => {
 });
 
 describe("runCommand", () => {
-  it("treats blank input as a noop and clear as clear (Req 24.8, 24.10)", () => {
+  it("treats blank input as a noop and clear as clear", () => {
     expect(runCommand("", ctx)).toEqual({ type: "noop" });
     expect(runCommand(" \n\t ", ctx)).toEqual({ type: "noop" });
     expect(runCommand("  CLEAR ", ctx)).toEqual({ type: "clear" });
   });
 
-  it("gives the same result for raw and normalized input (Req 24.5)", () => {
+  it("gives the same result for raw and normalized input", () => {
     expect(runCommand("  SKILLS  ", ctx)).toEqual(runCommand("skills", ctx));
     expect(runCommand(" FooBar ", ctx)).toEqual(runCommand("foobar", ctx));
   });
 
-  it("prints the owner's name and role for whoami", () => {
-    expect(outputOf("whoami")).toEqual(["Aishvarya Ramesh", ctx.owner.role]);
-    expect(ctx.owner.role).toContain("Data Engineer");
+  it("prints whoami, experience and education from terminal content config", () => {
+    expect(textOf("whoami")).toEqual([terminal.whoami]);
+    expect(textOf("experience")).toEqual(terminal.experience);
+    expect(textOf("education")).toEqual(terminal.education);
   });
 
-  it("prints every cluster with its skill names, BigQuery under Cloud and Databases", () => {
-    const out = outputOf("skills");
+  it("prints all skill clusters and skill names", () => {
+    const out = textOf("skills");
     expect(out).toHaveLength(ctx.skills.clusters.length);
-    expect(out.find((l) => l.startsWith("Cloud:"))).toContain("BigQuery");
-    expect(out.find((l) => l.startsWith("Databases:"))).toContain("BigQuery");
-    expect(out[0]).toContain("PySpark/Apache Spark");
+    expect(out.find((line) => line.startsWith("Cloud:"))).toContain("BigQuery");
+    expect(out.find((line) => line.startsWith("Databases:"))).toContain("BigQuery");
+    expect(out[0]).toContain("Apache Spark / PySpark");
   });
 
-  it("prints every Case_Study title and certification name", () => {
-    const p = outputOf("projects").join("\n");
-    for (const { title } of projects) expect(p).toContain(title);
-    const c = outputOf("certs").join("\n");
-    for (const { name } of certifications) expect(c).toContain(name);
+  it("prints every featured project and certification", () => {
+    const projects = textOf("projects").join("\n");
+    for (const project of work.featured) expect(projects).toContain(project.title);
+    expect(projects).toContain(terminal.projectsHint);
+    const certs = textOf("certs").join("\n");
+    for (const certification of certifications) expect(certs).toContain(certification.name);
   });
 
-  it("prints contact links and marks the missing resume as pending", () => {
-    expect(outputOf("contact")).toEqual([
-      "email: Aishvarya.ramesh@tamu.edu",
-      "linkedin: https://www.linkedin.com/in/aishvarya-ramesh",
-      "github: https://github.com/AishvaryaRamesh08",
-      "resume: not yet available",
-    ]);
+  it("prints configured public contact links as real-link output lines", () => {
+    const action = runCommand("contact", ctx);
+    if (action.type !== "append") throw new Error("expected contact output");
+    const links = action.output.filter((line): line is { text: string; href: string } =>
+      typeof line !== "string" && Boolean(line.href),
+    );
+    expect(links).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ text: expect.stringContaining("Aishvarya.ramesh@tamu.edu"), href: "mailto:Aishvarya.ramesh@tamu.edu" }),
+        expect.objectContaining({ text: expect.stringContaining("linkedin.com"), href: ctx.links.linkedin }),
+        expect.objectContaining({ text: expect.stringContaining("github.com"), href: ctx.links.github }),
+      ]),
+    );
   });
 
-  it("prints the resolved resume URL once the PDF is supplied", () => {
-    const withResume: TerminalContext = {
+  it("prints and opens the configured resume URL", () => {
+    const action = runCommand("resume", {
       ...ctx,
-      links: { ...ctx.links, resumePdf: "resume/cv.pdf" },
-      resumeAvailable: true,
-      resolvePath: (p) => `/base/${p}`,
-    };
-    expect(outputOf("contact", withResume)).toContain("resume: /base/resume/cv.pdf");
+      resolvePath: (path) => `/base${path}`,
+    });
+    expect(action).toMatchObject({
+      type: "append",
+      command: "resume",
+      output: [{ text: "/base/resume.pdf", href: "/base/resume.pdf" }],
+    });
+    expect(
+      runCommand("resume", { ...ctx, resumeUrl: "" }),
+    ).toMatchObject({ type: "append", output: [terminal.resumeUnavailable] });
   });
 
-  it("lists every command with its description for help (Req 24.9)", () => {
-    expect(outputOf("help")).toEqual(TERMINAL_COMMANDS.map((c) => `${c} - ${terminal.help[c]}`));
+  it("lists every command with its description for help", () => {
+    expect(textOf("help")).toEqual(TERMINAL_COMMANDS.map((command) => `${command} - ${terminal.help[command]}`));
   });
 
-  it("echoes the normalized unknown command and lists all seven commands (Req 24.4)", () => {
-    const action = runCommand("  LS -la ", ctx);
-    expect(action).toMatchObject({ type: "append", command: "ls -la" });
-    const [line] = outputOf("  LS -la ");
-    expect(line).toContain("ls -la");
-    for (const c of TERMINAL_COMMANDS) expect(line).toContain(c);
+  it("navigates to valid sections and rejects unsupported sections", () => {
+    expect(runCommand("goto work", ctx)).toMatchObject({
+      type: "append",
+      command: "goto work",
+      navigateTo: "work",
+      output: [terminal.gotoConfirmation("work")],
+    });
+    expect(textOf("goto about")).toEqual([terminal.gotoUnknown("about")]);
+  });
+
+  it("resolves aliases and searches free text with stop words removed", () => {
+    expect(textOf("who are you")).toEqual([terminal.whoami]);
+    expect(textOf("cv")).toEqual(textOf("resume"));
+    expect(textOf("what is BigQuery about?").join("\n")).toContain("BigQuery");
+    expect(textOf("texas a&m").join("\n")).toContain("Texas A&M University");
+  });
+
+  it("returns configured no-results feedback for an unmatched query", () => {
+    expect(textOf("qzxv-no-such-portfolio-topic")).toEqual([
+      terminal.noResults("qzxv-no-such-portfolio-topic"),
+    ]);
   });
 });
 
 describe("historyReducer", () => {
+  const append = (command: string) => ({ type: "append" as const, command, output: [command] });
+
   it("appends entries with increasing ids and leaves earlier entries untouched", () => {
     const h1 = historyReducer([], append("a"));
     const h2 = historyReducer(h1, append("b"));
-    expect(h2.map((e) => [e.id, e.command])).toEqual([
-      [0, "a"],
-      [1, "b"],
-    ]);
+    expect(h2.map((entry) => [entry.id, entry.command])).toEqual([[0, "a"], [1, "b"]]);
     expect(h2[0]).toBe(h1[0]);
   });
 
   it("returns the same history for noop and an empty one for clear", () => {
-    const h: readonly TerminalEntry[] = [{ id: 3, command: "x", output: [] }];
-    expect(historyReducer(h, { type: "noop" })).toBe(h);
-    expect(historyReducer(h, { type: "clear" })).toEqual([]);
+    const history: readonly TerminalEntry[] = [{ id: 3, command: "x", output: [] }];
+    expect(historyReducer(history, { type: "noop" })).toBe(history);
+    expect(historyReducer(history, { type: "clear" })).toEqual([]);
   });
 
-  it("keeps only the most recent max entries, oldest dropped first (Req 24.2)", () => {
-    let h: readonly TerminalEntry[] = [];
-    for (let i = 0; i < 55; i++) h = historyReducer(h, append(`c${i}`));
-    expect(h).toHaveLength(50);
-    expect(h[0].command).toBe("c5");
-    expect(h[49].command).toBe("c54");
-    expect(historyReducer(h, append("z"), 3).map((e) => e.command)).toEqual(["c53", "c54", "z"]);
+  it("keeps only the most recent max entries", () => {
+    let history: readonly TerminalEntry[] = [];
+    for (let index = 0; index < 55; index++) history = historyReducer(history, append(`c${index}`));
+    expect(history).toHaveLength(50);
+    expect(history[0].command).toBe("c5");
+    expect(history[49].command).toBe("c54");
+    expect(historyReducer(history, append("z"), 3).map((entry) => entry.command)).toEqual(["c53", "c54", "z"]);
   });
 });

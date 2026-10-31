@@ -48,7 +48,7 @@ const arbInput = fc.oneof(
 /** Page context and a custom one with a stub resolvePath and the resume present. */
 const customContext: TerminalContext = {
   ...defaultTerminalContext,
-  resumeAvailable: true,
+  resumeUrl: "/resume.pdf",
   resolvePath: (path) => `/stub-base/${path}`,
 };
 const arbContext = fc.constantFrom(defaultTerminalContext, customContext);

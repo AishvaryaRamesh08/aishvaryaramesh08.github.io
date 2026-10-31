@@ -59,26 +59,14 @@ export interface SizedSlot {
 export type SectionId =
   | "site-nav"
   | "hook"
-  | "intro"
-  | "story"
+  | "home"
   | "work"
-  | "analysis"
   | "skills"
-  | "certifications"
-  | "terminal"
   | "journey"
-  | "built-with-ai"
   | "contact"
   | "site-footer";
 
-export type NavGroupId =
-  | "story"
-  | "work"
-  | "analysis"
-  | "skills"
-  | "journey"
-  | "built-with-ai"
-  | "contact";
+export type NavGroupId = "about" | "work" | "skills" | "journey" | "contact";
 
 /** Sections that render an h2 heading from `site.sections` (Hook is labelled by its headline). */
 export type HeadedSectionId = Exclude<SectionId, "site-nav" | "site-footer" | "hook">;
@@ -105,7 +93,7 @@ export interface SiteConfig {
   alumniOf: readonly string[];
   /** Served from /public; validated as exactly 1200 × 630 and ≤ 1 MB (Req 29.3). */
   ogImage: { src: "og-image.png"; width: 1200; height: 630; alt: string };
-  sections: Record<HeadedSectionId, { heading: string; minHeight?: string }>;
+  sections: Record<HeadedSectionId, { heading: string; eyebrow: string; minHeight?: string }>;
   /** Every rendered content section belongs to one navigation group. */
   navGroups: readonly NavGroup[];
   /** Footer microcopy (Req 22): the colophon, social-link names and back-to-top label. */
@@ -141,7 +129,7 @@ export interface HookConfig {
   headline: { before: string; after: string };
   subline: string;
   /** "Meet the engineer ↓" */
-  primaryCta: { label: string; target: "intro" };
+  primaryCta: { label: string; target: "home" };
   /** A second route into the featured work. */
   secondaryCta: { label: string; target: "work" };
   /** The Hook_Arrow is decorative only (Req 8.14). */
@@ -158,26 +146,69 @@ export interface HookImages {
 // ---------- intro.ts ----------
 
 export interface StatChip {
-  /** "4", "50+", "3" — the exact final text after count-up (Req 9.6). */
+  /** Stable value displayed in a Hero stat. */
   finalText: string;
-  /** e.g. "tables migrated to BigQuery" */
   label: string;
+}
+
+export interface HeroFocusArea {
+  label: string;
+  icon: "data" | "ai" | "analytics" | "visualization";
 }
 
 export interface IntroConfig {
   name: string;
+  availability: string;
   titleLine: string;
-  typewriterLines: readonly [string, string, string];
-  paragraph: Slot<string>;
+  focusAreas: readonly HeroFocusArea[];
+  paragraph: string;
   chips: readonly [StatChip, StatChip, StatChip];
-  ctas: { explore: string; talk: string; resume: string };
+  ctas: { work: string; contact: string; resume: string };
+  resumeUrl: string;
+  photoPath: string;
+  photoAlt: string;
+  useMonogramFallback: boolean;
 }
 
-// ---------- story.ts ----------
+// ---------- rawToReady.ts ----------
 
-export interface StoryConfig {
-  /** Paragraphs, rendered verbatim in order. */
-  quote: Slot<readonly string[]>;
+export type RawToReadyField = "order_id" | "customer_id" | "order_date" | "amount" | "status";
+
+export interface RawToReadyRow {
+  rowNumber: number;
+  raw: Record<RawToReadyField, string>;
+  problems?: Partial<Record<RawToReadyField, string>>;
+  clean?: {
+    values: Record<RawToReadyField, string>;
+    fixes?: Partial<Record<RawToReadyField, string>>;
+  };
+}
+
+export interface RawToReadyConfig {
+  title: string;
+  subtitle: string;
+  sampleCaption: string;
+  panelLabels: { raw: string; clean: string; ready: string };
+  rowNumberLabel: string;
+  fieldLabels: Record<RawToReadyField, string>;
+  rawRows: readonly RawToReadyRow[];
+  showFixesLabel: string;
+  quarantine: {
+    heading: string;
+    orderIds: readonly string[];
+    note: string;
+  };
+  chart: {
+    title: string;
+    description: string;
+    dateAxis: string;
+    amountAxis: string;
+    amountLabel: string;
+    currencyUnit: string;
+    ticks: readonly number[];
+  };
+  summary: string;
+  tabsLabel: string;
 }
 
 // ---------- pipeline.ts ----------
@@ -403,9 +434,9 @@ export interface Certification {
   id: string;
   name: string;
   issuer: string;
-  logo: Slot<ImageAsset>;
-  /** ≤ 120 chars (validated, Req 18.2). */
-  meaning: string;
+  badgeImage?: ImageAsset;
+  /** ≤ 120 chars (validated). */
+  description: string;
   /** Verify is enabled only for an absolute https:// URL (runtime check, Req 18.4). */
   credentialUrl?: string;
 }
@@ -414,8 +445,11 @@ export interface Certification {
 
 export interface JourneyStage {
   label: string;
-  approxYear: string;
-  detail: string;
+  organization: string;
+  role: string;
+  years: string;
+  detail: readonly string[];
+  current?: boolean;
 }
 
 /** Non-empty, no blank fields (validated, Req 19.10). */
@@ -461,24 +495,61 @@ export interface ContactConfig {
 
 // ---------- terminal.ts ----------
 
-export type TerminalCommand = "whoami" | "skills" | "projects" | "certs" | "contact" | "help" | "clear";
+export type TerminalCommand =
+  | "whoami"
+  | "experience"
+  | "education"
+  | "skills"
+  | "projects"
+  | "certs"
+  | "contact"
+  | "resume"
+  | "help"
+  | "goto"
+  | "clear";
+
+export interface TerminalOutputLine {
+  text: string;
+  href?: string;
+  title?: boolean;
+}
+
+export interface TerminalSearchEntry {
+  title: string;
+  text: string;
+  keywords: readonly string[];
+  section?: SectionId;
+  href?: string;
+}
 
 export interface TerminalConfig {
-  heading: string;
+  windowLabel: string;
   inputLabel: string;
-  /** "visitor@aishvarya:~$" */
+  outputLabel: string;
+  banner: readonly [string, string];
   prompt: string;
-  /** One-line descriptions (Req 24.9). */
+  interruptOutput: string;
+  resultTitle: (number: number, title: string) => string;
+  whoami: string;
+  experience: readonly string[];
+  education: readonly string[];
   help: Record<TerminalCommand, string>;
-  /** Message for an unrecognized (normalized) command (Req 24.4). */
-  unknown: (cmd: string, supported: readonly TerminalCommand[]) => string;
+  aliases: Record<string, Exclude<TerminalCommand, "goto" | "clear">>;
+  gotoConfirmation: (section: string) => string;
+  gotoUnknown: (section: string) => string;
+  gotoHint: string;
+  resumeUnavailable: string;
+  projectsHint: string;
+  contactLabels: { email: string; linkedin: string; github: string };
+  noResults: (query: string) => string;
+  stopWords: readonly string[];
   maxHistory: 50;
 }
 
 export interface TerminalEntry {
   id: number;
   command: string;
-  output: readonly string[];
+  output: readonly (string | TerminalOutputLine)[];
 }
 
 // ---------- background.ts ----------

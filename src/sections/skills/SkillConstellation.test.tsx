@@ -1,19 +1,13 @@
-// Light example tests for the Skill_Constellation (Req 17). The full suite is task 14.6; these
-// cover the non-obvious contracts the component wires up: cluster labels render, every distinct
-// skill is a single focusable control named with its clusters, focusing a skill highlights its
-// projects and related skills, Escape clears the highlight, a skill with no project shows the
-// note, and the screen-reader listing is always present (even in the prerendered HTML).
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { SkillId } from "../../data/types";
+import { describe, expect, it } from "vitest";
+import { certifications } from "../../data/certifications";
 import { skills } from "../../data/skills";
-import { projects } from "../../data/projects";
+import { work } from "../../data/work";
 import { distinctSkillIds, skillAccessibleName } from "../../lib/skills";
 import SkillConstellation from "./SkillConstellation";
 
-/** Renders the body inside a real labelled section, matching how SectionShell wraps it. */
 function renderInSection() {
   return render(
     <section id="skills" aria-labelledby="skills-heading">
@@ -23,95 +17,68 @@ function renderInSection() {
   );
 }
 
-beforeEach(() => {
-  // Desktop graph branch: neither the mobile nor the tablet query matches, so hover is enabled.
-  vi.stubGlobal(
-    "matchMedia",
-    vi.fn((query: string) => ({
-      matches: false,
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    })),
-  );
-});
-
 describe("SkillConstellation", () => {
-  it("labels every cluster from the config", () => {
+  it("renders all configured skill clusters and certifications", () => {
     renderInSection();
-    for (const cluster of skills.clusters) {
-      expect(screen.getAllByText(cluster.name).length).toBeGreaterThan(0);
+    for (const cluster of skills.clusters) expect(screen.getByText(cluster.name)).toBeInTheDocument();
+    for (const cert of certifications) {
+      expect(screen.getAllByText(cert.issuer).length).toBeGreaterThan(0);
+      expect(screen.getByText(cert.name)).toBeInTheDocument();
+      expect(screen.getByText(cert.description)).toBeInTheDocument();
     }
   });
 
-  it("renders exactly one control per distinct skill, named with its cluster names", () => {
+  it("renders every skill as a wrapping focusable control and preserves BigQuery's shared membership", () => {
     renderInSection();
-    const ids = distinctSkillIds(skills);
-    for (const id of ids) {
-      const name = skillAccessibleName(id, skills);
-      expect(screen.getByRole("button", { name })).toBeInstanceOf(HTMLButtonElement);
+    for (const id of distinctSkillIds(skills)) {
+      expect(screen.getAllByRole("button", { name: skillAccessibleName(id, skills) }).length).toBeGreaterThan(0);
     }
-    // BigQuery belongs to two clusters but is a single node (Req 17.3).
     const bigquery = screen.getAllByRole("button", { name: skillAccessibleName("bigquery", skills) });
-    expect(bigquery).toHaveLength(1);
+    expect(bigquery).toHaveLength(2);
     expect(bigquery[0].getAttribute("aria-label")).toContain("Cloud");
     expect(bigquery[0].getAttribute("aria-label")).toContain("Databases");
+    expect(screen.getByText("Stakeholder communication")).toHaveClass("whitespace-normal");
   });
 
-  it("does not present skills as progress bars or percentages", () => {
-    renderInSection();
-    expect(screen.queryByRole("progressbar")).toBeNull();
-    expect(screen.queryByText(/%/)).toBeNull();
-  });
-
-  it("highlights the projects that used a skill when it is focused, and clears on Escape", async () => {
+  it("shows related skills and only featured work using the focused skill", async () => {
     const user = userEvent.setup();
     renderInSection();
-
-    const python = screen.getByRole("button", { name: skillAccessibleName("python", skills) });
-    fireEvent.focus(python);
-
-    // Python is used by the cloud-migration and stock-analysis Case_Studies; the visible selection
-    // panel (an aria-live region) lists their titles.
     const panel = screen.getByRole("complementary", { name: /featured work/i });
-    const pythonId: SkillId = "python";
-    const usedTitles = projects
-      .filter((p) => (p.tech as readonly SkillId[]).includes(pythonId))
-      .map((p) => p.title);
-    expect(usedTitles.length).toBeGreaterThan(0);
-    for (const title of usedTitles) {
-      expect(within(panel).getByText(title)).toBeInTheDocument();
-    }
+    expect(within(panel).getByText("Select a skill to see where I've used it.")).toBeInTheDocument();
+
+    fireEvent.focus(screen.getAllByRole("button", { name: skillAccessibleName("python", skills) })[0]);
+    const expectedTitles = work.featured
+      .filter((item) => item.tech.some((tech) => tech.id === "python"))
+      .map((item) => item.title);
+    expect(expectedTitles.length).toBeGreaterThan(0);
+    for (const title of expectedTitles) expect(within(panel).getByText(title)).toBeInTheDocument();
+    expect(within(panel).getByText(/sql/i)).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
-    expect(screen.getByText(/select a skill/i)).toBeInTheDocument();
+    expect(within(panel).getByText("Select a skill to see where I've used it.")).toBeInTheDocument();
   });
 
-  it("shows the no-featured-project note for a skill no project uses", () => {
+  it("updates the detail strip for tap and shows the no-work message when appropriate", async () => {
+    const user = userEvent.setup();
     renderInSection();
-    // SSIS appears in no Case_Study tech list.
-    const ssisId: SkillId = "ssis";
-    const used = projects.some((p) => (p.tech as readonly SkillId[]).includes(ssisId));
-    expect(used).toBe(false);
-
-    const ssis = screen.getByRole("button", { name: skillAccessibleName("ssis", skills) });
-    fireEvent.focus(ssis);
-    const panel = screen.getByRole("complementary", { name: /featured work/i });
-    expect(within(panel).getByText(/no featured project currently uses this skill/i)).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: skillAccessibleName("ssis", skills) })[0]);
+    expect(screen.getByText("No featured work currently uses this skill.")).toBeInTheDocument();
   });
 
-  it("includes the screen-reader skill listing in the prerendered HTML", () => {
-    const html = renderToString(
-      <section id="skills" aria-labelledby="skills-heading">
-        <h2 id="skills-heading">Skills</h2>
-        <SkillConstellation />
-      </section>,
-    );
-    // Every cluster name and a representative skill/project pairing are present without interaction.
-    for (const cluster of skills.clusters) {
-      expect(html).toContain(cluster.name);
-    }
-    expect(html).toContain("Migrating 50+ tables to the cloud");
-    expect(html).toContain("No featured project currently uses this skill.");
+  it("keeps hover details visible while the pointer moves within the skill card", () => {
+    renderInSection();
+    const python = screen.getAllByRole("button", { name: skillAccessibleName("python", skills) })[0];
+    const panel = screen.getByRole("complementary", { name: /featured work/i });
+    fireEvent.pointerEnter(python, { pointerType: "mouse" });
+    fireEvent.pointerLeave(python, { pointerType: "mouse", relatedTarget: panel });
+    expect(within(panel).queryByText("Select a skill to see where I've used it.")).toBeNull();
+    fireEvent.pointerLeave(panel.parentElement!, { pointerType: "mouse" });
+    expect(within(panel).getByText("Select a skill to see where I've used it.")).toBeInTheDocument();
+  });
+
+  it("renders the skill groups in server-rendered markup", () => {
+    const html = renderToString(<SkillConstellation />);
+    for (const cluster of skills.clusters) expect(html).toContain(cluster.name);
+    expect(html).toContain("Select a skill to see where I&#x27;ve used it.");
   });
 });

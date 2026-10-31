@@ -1,6 +1,6 @@
 /**
- * Background_Layer settings (Req 6). Decorative scene elements stay subtle and the SQL ticker
- * sits at 0.06 (Req 6.1, 6.7); the mobile object cap is below the desktop count (Req 6.9).
+ * Background_Layer settings. Icon opacity restores the earlier visible-but-subtle levels; the
+ * mobile object cap remains below the desktop count.
  */
 import type { BackgroundConfig } from "./types";
 

@@ -24,7 +24,6 @@ import type {
   PipelineConfig,
   SiteConfig,
   SkillsConfig,
-  StoryConfig,
   TerminalConfig,
   VizConfig,
 } from "../../data/types";
@@ -65,7 +64,6 @@ export interface Content {
   hook: HookConfig;
   hookImages: HookImages;
   intro: IntroConfig;
-  story: StoryConfig;
   pipeline: PipelineConfig;
   projects: readonly CaseStudy[];
   dependencyDemo: DependencyDemoConfig;
@@ -87,7 +85,6 @@ export const CONTENT_FILES = {
   hook: "hook.ts",
   hookImages: "hook.ts",
   intro: "intro.ts",
-  story: "story.ts",
   pipeline: "pipeline.ts",
   projects: "projects.ts",
   dependencyDemo: "dependencyDemo.ts",

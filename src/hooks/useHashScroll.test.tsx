@@ -30,15 +30,16 @@ afterEach(() => {
 describe("parseSectionHash / sectionsUpTo", () => {
   it("accepts known section IDs only", () => {
     expect(parseSectionHash("#work")).toBe("work");
-    expect(parseSectionHash("#built-with-ai")).toBe("built-with-ai");
+    expect(parseSectionHash("#built-with-ai")).toBeNull();
     expect(parseSectionHash("#nope")).toBeNull();
     expect(parseSectionHash("#%E0%A4%A")).toBeNull();
     expect(parseSectionHash("")).toBeNull();
   });
 
-  it("lists every section from the Hook_Screen to the target in page order", () => {
-    expect(sectionsUpTo("work")).toEqual(["hook", "intro", "work"]);
-    expect(sectionsUpTo("hook")).toEqual(["hook"]);
+  it("lists every rendered section up to the target in page order", () => {
+    expect(sectionsUpTo("work")).toEqual(["home", "work"]);
+    expect(sectionsUpTo("hook")).toEqual([]);
+    expect(parseSectionHash("#hook")).toBeNull();
   });
 });
 

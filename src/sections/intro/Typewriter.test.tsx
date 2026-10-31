@@ -6,10 +6,9 @@
 // `lib/motion.ts`; here we only assert what the DOM exposes to a screen reader.
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { intro } from "../../data/intro";
 import { Typewriter } from "./Typewriter";
 
-const LINES = intro.typewriterLines;
+const LINES = ["Data pipelines.", "Trusted decisions.", "Analysis-ready data."] as const;
 
 /** Stubs `prefers-reduced-motion` so the motion store reports the chosen mode. */
 function stubReducedMotion(reduced: boolean) {

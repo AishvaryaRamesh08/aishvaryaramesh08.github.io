@@ -2,8 +2,13 @@
 // the functions return plain trace/layout/config objects and geometry that the JourneyChart
 // component hands to `Plotly.newPlot` and to its React-owned overlay.
 
-import type { JourneyStage } from "../data/types";
 import type { Theme } from "./theme";
+
+export interface JourneyTraceStage {
+  label: string;
+  approxYear: string;
+  detail: string;
+}
 
 // ---------- Geometry types ----------
 
@@ -76,10 +81,20 @@ export interface JourneyColors {
   currentRing: string;
 }
 
-/** Mirrors `--color-cyan`, `--color-maroon` and `--color-maroon-ring` in tokens.css. */
+/** CSS token references used by pure tests; the rendered Plotly chart resolves these tokens first. */
 export const JOURNEY_COLORS: Readonly<Record<Theme, Readonly<JourneyColors>>> = {
-  dark: { line: "#22d3ee", marker: "#22d3ee", current: "#7a1f33", currentRing: "#a78bfa" },
-  light: { line: "#0891b2", marker: "#0891b2", current: "#500000", currentRing: "#6d28d9" },
+  dark: {
+    line: "var(--color-cyan)",
+    marker: "var(--color-cyan)",
+    current: "var(--color-maroon)",
+    currentRing: "var(--color-maroon-ring)",
+  },
+  light: {
+    line: "var(--color-cyan)",
+    marker: "var(--color-cyan)",
+    current: "var(--color-maroon)",
+    currentRing: "var(--color-maroon-ring)",
+  },
 };
 
 // ---------- buildJourneyTrace ----------
@@ -145,7 +160,7 @@ export interface JourneyTrace {
   config: JourneyPlotConfig;
 }
 
-const TRANSPARENT = "rgba(0,0,0,0)";
+const TRANSPARENT = "transparent";
 
 const axis = (n: number): JourneyAxis => ({
   visible: false,
@@ -163,7 +178,7 @@ const axis = (n: number): JourneyAxis => ({
  * legend and native hover are off; `staticPlot` disables zoom and the modebar (Req 19.8).
  */
 export function buildJourneyTrace(
-  stages: readonly JourneyStage[],
+  stages: readonly JourneyTraceStage[],
   colors: Readonly<JourneyColors> = JOURNEY_COLORS.dark,
 ): JourneyTrace {
   const n = stages.length;

@@ -1,13 +1,8 @@
-// Light example tests for the Cloud certifications section (Req 18). The full unit suite is task
-// 15.3 and the Verify-enablement property test is task 15.2; these cover the non-obvious contracts:
-// exactly three cards render in `certifications.ts` order with no heading of their own, an enabled
-// Verify link opens in a new tab with the safe rel, and a card without a credential URL renders a
-// disabled "pending" marker with no href (Req 18.1, 18.3, 18.4).
+// Covers certification order and the optional Verify link behavior.
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { certifications } from "../../data/certifications";
 import { CertificationCard } from "./CertificationCard";
-import { certificationsCopy } from "./copy";
 import { isVerifyEnabled } from "./verify";
 import Certifications from "./Certifications";
 
@@ -25,7 +20,7 @@ describe("Certifications", () => {
     expect(screen.queryByRole("heading", { level: 2 })).toBeNull();
   });
 
-  it("renders a disabled pending marker (no href) when the credential URL is absent (Req 18.4)", () => {
+  it("omits Verify when the credential URL is absent", () => {
     const cert = { ...certifications[0], credentialUrl: undefined };
     render(
       <ul>
@@ -33,9 +28,7 @@ describe("Certifications", () => {
       </ul>,
     );
 
-    const pending = screen.getByRole("link", { name: certificationsCopy.pendingLabel(cert.name) });
-    expect(pending).toHaveAttribute("aria-disabled", "true");
-    expect(pending).not.toHaveAttribute("href");
+    expect(screen.queryByRole("link")).toBeNull();
     expect(isVerifyEnabled(cert)).toBe(false);
   });
 
@@ -47,7 +40,7 @@ describe("Certifications", () => {
       </ul>,
     );
 
-    const link = screen.getByRole("link", { name: new RegExp(`^${certificationsCopy.verify} `) });
+    const link = screen.getByRole("link", { name: /^Verify/ });
     expect(link).toHaveAttribute("href", cert.credentialUrl);
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");

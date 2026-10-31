@@ -11,9 +11,9 @@ export const skills = {
   skills: [
     { id: "python", name: "Python" },
     { id: "sql", name: "SQL" },
-    { id: "pyspark", name: "PySpark/Apache Spark" },
+    { id: "pyspark", name: "Apache Spark / PySpark" },
     { id: "airflow", name: "Airflow" },
-    { id: "etl-elt", name: "ETL/ELT" },
+    { id: "etl-elt", name: "ETL / ELT" },
     { id: "ssis", name: "SSIS" },
     { id: "unix", name: "UNIX" },
     { id: "data-pipelines", name: "Data pipelines" },

@@ -166,9 +166,9 @@ export function DependencyDemo({ className }: DependencyDemoProps) {
                   className={cx(
                     "transition-colors",
                     ns === "failed"
-                      ? "fill-surface-2 stroke-red-400"
+                      ? "fill-surface-2 stroke-status-danger"
                       : ns === "downstream"
-                        ? "fill-surface-2 stroke-amber-400"
+                        ? "fill-surface-2 stroke-status-warning"
                         : "fill-surface stroke-border",
                   )}
                   strokeWidth={ns === "idle" ? 1.5 : 2.5}
@@ -203,8 +203,8 @@ export function DependencyDemo({ className }: DependencyDemoProps) {
 function Legend() {
   const { demo } = workCopy;
   const items: { label: string; swatch: string }[] = [
-    { label: demo.legendFailed, swatch: "border-red-400 bg-surface-2" },
-    { label: demo.legendDownstream, swatch: "border-amber-400 bg-surface-2" },
+    { label: demo.legendFailed, swatch: "border-status-danger bg-surface-2" },
+    { label: demo.legendDownstream, swatch: "border-status-warning bg-surface-2" },
     { label: demo.legendIdle, swatch: "border-border bg-surface" },
   ];
   return (

@@ -37,42 +37,36 @@ afterEach(() => {
 });
 
 describe("useActiveNavGroup", () => {
-  it("returns the group containing the viewport midpoint, and null over the Hook_Screen and Footer", async () => {
+  it("returns the group containing the viewport midpoint, and null over Home and Footer", async () => {
     const half = window.innerHeight / 2;
     mountPage([
-      ["hook", 1000],
-      ["intro", 800],
+      ["home", 1000],
       ["work", 1000],
       ["skills", 800],
-      ["certifications", 600],
-      ["terminal", 800],
       ["journey", 600],
-      ["built-with-ai", 800],
-      ["analysis", 800],
-      ["story", 800],
       ["contact", 600],
       ["site-footer", 400],
     ]);
     render(<Probe />);
     const active = screen.getByTestId("active");
 
-    // Midpoint inside the Hook_Screen.
+    // Midpoint inside Home.
     await waitFor(() => expect(active).toHaveTextContent("none"));
 
     // Midpoint inside Work.
-    act(() => scrollWindowTo(2300 - half));
+    act(() => scrollWindowTo(1000 + half));
     await waitFor(() => expect(active).toHaveTextContent("work"));
 
     // Midpoint inside Skills.
-    act(() => scrollWindowTo(3500 - half));
+    act(() => scrollWindowTo(2000 + half));
     await waitFor(() => expect(active).toHaveTextContent("skills"));
 
-    // The Story group remains active at the final story section.
-    act(() => scrollWindowTo(7900 - half));
-    await waitFor(() => expect(active).toHaveTextContent("story"));
+    // Contact has its own nav group after Journey.
+    act(() => scrollWindowTo(3700 - half));
+    await waitFor(() => expect(active).toHaveTextContent("contact"));
 
     // Midpoint inside the Footer.
-    act(() => scrollWindowTo(8800 - half));
+    act(() => scrollWindowTo(4200 - half));
     await waitFor(() => expect(active).toHaveTextContent("none"));
   });
 });

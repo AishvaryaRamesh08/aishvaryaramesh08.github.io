@@ -80,7 +80,14 @@ export function collectAssetRefs(content: AssetContent): AssetRef[] {
   });
 
   content.certifications.forEach((cert, i) => {
-    refs.push(...imageRef(CONTENT_FILES.certifications, `[${i}].logo`, cert.logo));
+    if (cert.badgeImage) {
+      refs.push({
+        file: CONTENT_FILES.certifications,
+        path: `[${i}].badgeImage.src`,
+        src: cert.badgeImage.src,
+        declared: sizeOf(cert.badgeImage),
+      });
+    }
   });
 
   const shots = content.builtWithAi.artifacts;

@@ -18,7 +18,7 @@ import {
 
 /** Reference model: the kept commands/outputs in submission order plus the next id to assign. */
 interface Model {
-  entries: { command: string; output: readonly string[] }[];
+  entries: { command: string; output: readonly TerminalEntry["output"][number][] }[];
   nextId: number;
 }
 

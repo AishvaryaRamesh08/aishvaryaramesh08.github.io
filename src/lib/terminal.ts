@@ -1,161 +1,297 @@
-// Terminal_Widget command logic (Req 24.2–24.5, 24.7–24.10). Pure TypeScript, no DOM.
-//
-// Every response is generated from the Content_Config passed in a `TerminalContext`, so the
-// terminal never drifts from what the page shows and can be property-tested against generated
-// content. Inputs are normalized (trimmed + lower-cased) before dispatch, and the unknown-command
-// message echoes the normalized command (design interpretation note 1), so Req 24.5 holds for all
-// inputs.
-
 import { certifications } from "../data/certifications";
 import { contact } from "../data/contact";
 import { intro } from "../data/intro";
-import { projects } from "../data/projects";
 import { skills } from "../data/skills";
 import { terminal } from "../data/terminal";
+import { work, type FeaturedWorkItem } from "../data/work";
 import {
   isPlaceholder,
-  type CaseStudy,
   type Certification,
   type ContactLinks,
+  type SectionId,
   type SkillsConfig,
   type TerminalCommand,
   type TerminalConfig,
   type TerminalEntry,
+  type TerminalOutputLine,
+  type TerminalSearchEntry,
 } from "../data/types";
 import { withBase } from "./url";
 
-/** The seven supported commands, in the order `help` and the unknown-command message list them. */
 export const TERMINAL_COMMANDS = [
   "whoami",
+  "experience",
+  "education",
   "skills",
   "projects",
   "certs",
   "contact",
+  "resume",
   "help",
+  "goto",
   "clear",
 ] as const satisfies readonly TerminalCommand[];
 
-/** Default number of entries the output history keeps (Req 24.2). */
 export const DEFAULT_MAX_HISTORY = 50;
 
-/** Everything the commands read. Only the fields each command needs, so tests can generate it. */
 export interface TerminalContext {
-  config: Pick<TerminalConfig, "help" | "unknown">;
-  /** `whoami` (Req 24.3). */
-  owner: { name: string; role: string };
-  /** `skills`: every cluster with its skills. */
+  config: TerminalConfig;
   skills: SkillsConfig;
-  /** `projects`: every Case_Study title. */
-  projects: readonly Pick<CaseStudy, "title">[];
-  /** `certs`: every Certification_Card name. */
-  certifications: readonly Pick<Certification, "name">[];
-  /** `contact`: email, LinkedIn, GitHub and resume PDF links (shared with Contact and Footer). */
+  projects: readonly Pick<FeaturedWorkItem, "title" | "summary" | "context" | "tech">[];
+  certifications: readonly Pick<Certification, "issuer" | "name" | "description">[];
   links: ContactLinks;
-  /** Whether the resume PDF is present at build time (Req 9.10); false prints it as pending. */
-  resumeAvailable: boolean;
-  /** Turns a site-relative path (the resume PDF) into the served URL, e.g. `withBase`. */
+  resumeUrl: string;
   resolvePath: (path: string) => string;
+  searchIndex: readonly TerminalSearchEntry[];
 }
 
-/** Result of one submission, applied to the history by `historyReducer`. */
+type SearchIndexSource = Omit<TerminalContext, "searchIndex" | "resolvePath" | "resumeUrl">;
+
 export type TerminalAction =
-  /** A supported command other than `clear`, or an unknown command (Req 24.2, 24.4). */
-  | { type: "append"; command: string; output: readonly string[] }
-  /** `clear` (Req 24.10). */
+  | { type: "append"; command: string; output: readonly (string | TerminalOutputLine)[]; navigateTo?: SectionId }
   | { type: "clear" }
-  /** Blank or whitespace-only input (Req 24.8). */
   | { type: "noop" };
 
-/** Text printed for a contact link the Owner has not supplied yet. */
-export const PENDING_LINK_TEXT = "not yet available";
-
-/** Trims leading/trailing whitespace and lower-cases the input (Req 24.5). */
 export function normalizeCommand(input: string): string {
   return input.trim().toLowerCase();
 }
 
-/** Type guard for the seven supported commands. */
-export function isTerminalCommand(value: string): value is TerminalCommand {
+export function normalizeSearchText(input: string): string[] {
+  return input
+    .toLowerCase()
+    .replace(/\ba\s*&\s*m\b/g, "am")
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function isTerminalCommand(value: string): value is TerminalCommand {
   return (TERMINAL_COMMANDS as readonly string[]).includes(value);
 }
 
-/** Lines printed by each command that appends output. */
-function commandOutput(command: Exclude<TerminalCommand, "clear">, ctx: TerminalContext): readonly string[] {
+function emailOutput(email: string): TerminalOutputLine | undefined {
+  const address = email.replace(/^mailto:/i, "").trim();
+  const separator = address.lastIndexOf("@");
+  if (!address || separator <= 0 || separator === address.length - 1) return undefined;
+  const localPart = address.slice(0, separator);
+  const domainPart = address.slice(separator + 1);
+  return { text: `${localPart}@${domainPart}`, href: `mailto:${localPart}@${domainPart}` };
+}
+
+function contactOutput(ctx: TerminalContext): TerminalOutputLine[] {
+  const output: TerminalOutputLine[] = [];
+  const email = emailOutput(ctx.links.email);
+  if (email) output.push({ text: `${ctx.config.contactLabels.email}: ${email.text}`, href: email.href });
+  if (!isPlaceholder(ctx.links.linkedin)) {
+    output.push({ text: `${ctx.config.contactLabels.linkedin}: ${ctx.links.linkedin}`, href: ctx.links.linkedin });
+  }
+  if (!isPlaceholder(ctx.links.github)) {
+    output.push({ text: `${ctx.config.contactLabels.github}: ${ctx.links.github}`, href: ctx.links.github });
+  }
+  return output;
+}
+
+function contactSearchEntries(ctx: SearchIndexSource): TerminalSearchEntry[] {
+  const entries: TerminalSearchEntry[] = [];
+  const email = emailOutput(ctx.links.email);
+  if (email) {
+    entries.push({
+      title: ctx.config.contactLabels.email,
+      text: email.text,
+      keywords: [ctx.config.contactLabels.email, email.text],
+      section: "contact",
+      href: email.href,
+    });
+  }
+  if (!isPlaceholder(ctx.links.linkedin)) {
+    entries.push({
+      title: ctx.config.contactLabels.linkedin,
+      text: ctx.links.linkedin,
+      keywords: [ctx.config.contactLabels.linkedin, ctx.links.linkedin],
+      section: "contact",
+      href: ctx.links.linkedin,
+    });
+  }
+  if (!isPlaceholder(ctx.links.github)) {
+    entries.push({
+      title: ctx.config.contactLabels.github,
+      text: ctx.links.github,
+      keywords: [ctx.config.contactLabels.github, ctx.links.github],
+      section: "contact",
+      href: ctx.links.github,
+    });
+  }
+  return entries;
+}
+
+export function buildSearchIndex(source: SearchIndexSource): readonly TerminalSearchEntry[] {
+  const skillName = new Map(source.skills.skills.map((skill) => [skill.id, skill.name] as const));
+  const experiences = source.config.experience.map((text) => ({
+    title: text.split(",")[0],
+    text,
+    keywords: [text],
+    section: "journey" as const,
+  }));
+  const education = source.config.education.map((text) => ({
+    title: text.split(",")[0],
+    text,
+    keywords: [text],
+    section: "journey" as const,
+  }));
+  const skillClusters = source.skills.clusters.map((cluster) => {
+    const names = cluster.skills.map((id) => skillName.get(id) ?? id);
+    return {
+      title: cluster.name,
+      text: names.join(", "),
+      keywords: [cluster.name, ...names],
+      section: "skills" as const,
+    };
+  });
+  const projects = source.projects.map((project) => ({
+    title: project.title,
+    text: project.summary,
+    keywords: [project.context ?? "", ...project.tech.map((item) => item.label)],
+    section: "work" as const,
+  }));
+  const certs = source.certifications.map((cert) => ({
+    title: `${cert.issuer}, ${cert.name}`,
+    text: cert.description,
+    keywords: [cert.issuer, cert.name],
+    section: "skills" as const,
+  }));
+
+  return [...experiences, ...education, ...skillClusters, ...projects, ...certs, ...contactSearchEntries(source)];
+}
+
+function outputFor(command: Exclude<TerminalCommand, "goto" | "clear">, ctx: TerminalContext) {
   switch (command) {
     case "whoami":
-      return [ctx.owner.name, ctx.owner.role];
+      return [ctx.config.whoami];
+    case "experience":
+      return ctx.config.experience;
+    case "education":
+      return ctx.config.education;
     case "skills": {
-      const names = new Map(ctx.skills.skills.map((s) => [s.id, s.name] as const));
+      const names = new Map(ctx.skills.skills.map((skill) => [skill.id, skill.name] as const));
       return ctx.skills.clusters.map(
         (cluster) => `${cluster.name}: ${cluster.skills.map((id) => names.get(id) ?? id).join(", ")}`,
       );
     }
     case "projects":
-      return ctx.projects.map((p) => `- ${p.title}`);
+      return [...ctx.projects.map((project) => `- ${project.title}`), ctx.config.projectsHint];
     case "certs":
-      return ctx.certifications.map((c) => `- ${c.name}`);
-    case "contact": {
-      const { email, linkedin, github, resumePdf } = ctx.links;
-      const resume =
-        isPlaceholder(resumePdf) || !ctx.resumeAvailable ? PENDING_LINK_TEXT : ctx.resolvePath(resumePdf);
-      return [
-        `email: ${email.replace(/^mailto:/, "")}`,
-        `linkedin: ${isPlaceholder(linkedin) ? PENDING_LINK_TEXT : linkedin}`,
-        `github: ${isPlaceholder(github) ? PENDING_LINK_TEXT : github}`,
-        `resume: ${resume}`,
-      ];
-    }
+      return ctx.certifications.map((cert) => `- ${cert.issuer}, ${cert.name}`);
+    case "contact":
+      return contactOutput(ctx);
+    case "resume":
+      return ctx.resumeUrl.trim()
+        ? [{ text: ctx.resolvePath(ctx.resumeUrl), href: ctx.resolvePath(ctx.resumeUrl) }]
+        : [ctx.config.resumeUnavailable];
     case "help":
-      return TERMINAL_COMMANDS.map((c) => `${c} - ${ctx.config.help[c]}`);
+      return TERMINAL_COMMANDS.map((item) => `${item} - ${ctx.config.help[item]}`);
   }
 }
 
-/**
- * Dispatches one submitted input. Blank input is a `noop`, `clear` clears, and every other input
- * appends an entry whose `command` is the normalized input. Depends only on `normalizeCommand(input)`.
- */
+function search(input: string, ctx: TerminalContext): readonly (string | TerminalOutputLine)[] {
+  const stopWords = new Set(ctx.config.stopWords);
+  const tokens = normalizeSearchText(input).filter((token) => !stopWords.has(token));
+  if (tokens.length === 0) return [ctx.config.noResults(input)];
+
+  const ranked = ctx.searchIndex
+    .map((entry, index) => {
+      const titleTokens = normalizeSearchText(entry.title);
+      const keywordTokens = normalizeSearchText(entry.keywords.join(" "));
+      const textTokens = normalizeSearchText(entry.text);
+      let score = 0;
+      let matchedTokens = 0;
+
+      for (const token of tokens) {
+        const weight = (words: readonly string[], exact: number, prefix: number) =>
+          words.some((word) => word === token) ? exact : words.some((word) => word.startsWith(token)) ? prefix : 0;
+        const tokenScore = Math.max(
+          weight(titleTokens, 6, 3),
+          weight(keywordTokens, 4, 2),
+          weight(textTokens, 2, 1),
+        );
+        if (tokenScore > 0) {
+          score += tokenScore;
+          matchedTokens++;
+        }
+      }
+
+      return { entry, index, score: matchedTokens === 0 ? 0 : score / tokens.length };
+    })
+    .filter((match) => match.score > 0)
+    .sort((left, right) => right.score - left.score || left.index - right.index)
+    .slice(0, 3);
+
+  if (ranked.length === 0) return [ctx.config.noResults(input)];
+  return ranked.flatMap(({ entry }, index) => [
+    { text: ctx.config.resultTitle(index + 1, entry.title), title: true },
+    entry.href ? { text: entry.text, href: entry.href } : entry.text,
+    ...(entry.section ? [`${ctx.config.gotoHint} ${entry.section}`] : []),
+  ]);
+}
+
 export function runCommand(input: string, ctx: TerminalContext): TerminalAction {
-  const command = normalizeCommand(input);
-  if (command === "") return { type: "noop" };
-  if (isTerminalCommand(command)) {
-    if (command === "clear") return { type: "clear" };
-    return { type: "append", command, output: commandOutput(command, ctx) };
+  const normalized = normalizeCommand(input);
+  if (!normalized) return { type: "noop" };
+  if (normalized === "clear") return { type: "clear" };
+
+  if (normalized === "goto" || normalized.startsWith("goto ")) {
+    const target = normalized.slice("goto".length).trim();
+    const destinations = ["work", "skills", "journey", "contact"] as const satisfies readonly SectionId[];
+    const destination = destinations.find((item) => item === target);
+    if (destination) {
+      return {
+        type: "append",
+        command: normalized,
+        output: [ctx.config.gotoConfirmation(target)],
+        navigateTo: destination,
+      };
+    }
+    return { type: "append", command: normalized, output: [ctx.config.gotoUnknown(target || "section")] };
   }
-  return { type: "append", command, output: [ctx.config.unknown(command, TERMINAL_COMMANDS)] };
+
+  const aliasQuery = normalizeSearchText(normalized).join(" ");
+  const command = ctx.config.aliases[aliasQuery] ?? normalized;
+  if (isTerminalCommand(command)) {
+    return { type: "append", command: normalized, output: outputFor(command, ctx) };
+  }
+
+  const output = search(normalized, ctx);
+  return { type: "append", command: normalized, output };
 }
 
-/**
- * Applies an action to the output history: `append` adds one entry at the end and drops the oldest
- * entries beyond `max` (Req 24.2), `clear` empties it (Req 24.10), `noop` returns `h` unchanged
- * (Req 24.8). Earlier entries are never modified (Req 24.4). Ids increase by one per appended
- * entry, so they stay unique within a history and are usable as React keys.
- */
 export function historyReducer(
-  h: readonly TerminalEntry[],
-  a: TerminalAction,
+  history: readonly TerminalEntry[],
+  action: TerminalAction,
   max: number = DEFAULT_MAX_HISTORY,
 ): readonly TerminalEntry[] {
-  switch (a.type) {
+  switch (action.type) {
     case "noop":
-      return h;
+      return history;
     case "clear":
-      return h.length === 0 ? h : [];
+      return history.length === 0 ? history : [];
     case "append": {
-      const id = h.length === 0 ? 0 : h[h.length - 1].id + 1;
-      const next = [...h, { id, command: a.command, output: a.output }];
+      const id = history.length === 0 ? 0 : history[history.length - 1].id + 1;
+      const next = [...history, { id, command: action.command, output: action.output }];
       return next.length > max ? next.slice(next.length - Math.max(0, max)) : next;
     }
   }
 }
 
-/** The context the page uses, built from the Content_Config files. */
-export const defaultTerminalContext: TerminalContext = {
+const terminalSearchSource: SearchIndexSource = {
   config: terminal,
-  owner: { name: intro.name, role: intro.titleLine },
   skills,
-  projects,
+  projects: work.featured,
   certifications,
   links: contact.links,
-  resumeAvailable: typeof __RESUME_AVAILABLE__ !== "undefined" && __RESUME_AVAILABLE__,
+};
+
+export const defaultTerminalContext: TerminalContext = {
+  ...terminalSearchSource,
+  resumeUrl: intro.resumeUrl,
   resolvePath: (path) => withBase(path),
+  searchIndex: buildSearchIndex(terminalSearchSource),
 };

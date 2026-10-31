@@ -1,6 +1,6 @@
 /**
  * `certMeaning` (Req 18.1, 18.2): exactly three certifications, each with a non-empty
- * "what this means for my work" statement of at most 120 characters.
+ * description of at most 120 characters.
  */
 import { CONTENT_FILES, charLength, hasText, validationError, type Content, type ValidationError } from "./types";
 
@@ -15,15 +15,15 @@ export function certMeaning(content: Pick<Content, "certifications">): Validatio
     errors.push(validationError(file, "", `${certs.length} certifications (expected exactly ${CERTIFICATIONS.count})`));
   }
   certs.forEach((cert, i) => {
-    const path = `[${i}].meaning`;
-    if (!hasText(cert.meaning)) {
-      errors.push(validationError(file, path, `"${cert.name}": meaning is empty`));
+    const path = `[${i}].description`;
+    if (!hasText(cert.description)) {
+      errors.push(validationError(file, path, `"${cert.name}": description is empty`));
       return;
     }
-    const len = charLength(cert.meaning);
+    const len = charLength(cert.description);
     if (len > CERTIFICATIONS.maxMeaningChars) {
       errors.push(
-        validationError(file, path, `"${cert.name}": meaning is ${len} characters (max ${CERTIFICATIONS.maxMeaningChars})`),
+        validationError(file, path, `"${cert.name}": description is ${len} characters (max ${CERTIFICATIONS.maxMeaningChars})`),
       );
     }
   });

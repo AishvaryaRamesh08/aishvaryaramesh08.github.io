@@ -48,7 +48,7 @@ describe("HookScreen", () => {
 
     const primary = screen.getByRole("link", { name: hook.primaryCta.label });
     const secondary = screen.getByRole("link", { name: hook.secondaryCta.label });
-    expect(primary).toHaveAttribute("href", `${BASE_URL}#intro`);
+    expect(primary).toHaveAttribute("href", `${BASE_URL}#home`);
     expect(secondary).toHaveAttribute("href", `${BASE_URL}#work`);
 
     await user.click(secondary);

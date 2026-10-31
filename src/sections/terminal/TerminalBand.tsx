@@ -1,10 +1,8 @@
-// Terminal_Band (Req 24.11). The section heading and anchor come from `SectionShell`
-// (`site.sections.terminal.heading`, which reads `terminal.heading`), so they are prerendered
-// (Req 3.2, 3.3). This body renders the single `TerminalWidget` on the page: there is no floating
-// launcher or any other instance elsewhere (Req 24.11), and the widget is imported only here.
+// Retained legacy wrapper; it is not included in the section registry. The current compact
+// command/search widget is rendered inside the Hero by IntroScreen.
 import { TerminalWidget } from "./TerminalWidget";
 
-/** Terminal_Band body: the one interactive Terminal_Widget, placed between Certifications and Journey. */
+/** Legacy standalone body, intentionally left unmounted. */
 export default function TerminalBand() {
   return (
     <div data-section-body="terminal">

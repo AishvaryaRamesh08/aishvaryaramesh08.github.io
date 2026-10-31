@@ -12,7 +12,7 @@ import { cx } from "../lib/cx";
 import { scrollProgress } from "../lib/scroll";
 import { readNavHeight, scrollToSection } from "../lib/scrollToSection";
 import { MobileMenu } from "./MobileMenu";
-import { HOME_HREF, HOOK_ID, isPlainClick, NAV_LINKS } from "./navLinks";
+import { HOME_HREF, HOME_ID, isPlainClick, NAV_LINKS } from "./navLinks";
 import { ThemeToggle } from "./ThemeToggle";
 
 /** Small database-cylinder logo mark (Req 7.1). */
@@ -57,15 +57,15 @@ function MenuIcon() {
 }
 
 /**
- * `true` once the Hook_Screen's bottom edge has moved above the Navbar's bottom edge (Req 7.7,
- * 7.8): the Hook is observed against the viewport minus the Navbar's height. Without
+ * `true` once Home's bottom edge has moved above the Navbar's bottom edge (Req 7.7, 7.8).
+ * Without
  * IntersectionObserver (or a Hook) the Navbar stays solid so it is always readable.
  */
 function useNavbarSolid(): boolean {
   const [solid, setSolid] = useState(false);
   useEffect(() => {
-    const hook = document.getElementById(HOOK_ID);
-    if (!hook || typeof IntersectionObserver === "undefined") {
+    const home = document.getElementById(HOME_ID);
+    if (!home || typeof IntersectionObserver === "undefined") {
       const id = setTimeout(() => setSolid(true), 0);
       return () => clearTimeout(id);
     }
@@ -76,7 +76,7 @@ function useNavbarSolid(): boolean {
       },
       { rootMargin: `-${readNavHeight()}px 0px 0px 0px`, threshold: 0 },
     );
-    observer.observe(hook);
+    observer.observe(home);
     return () => observer.disconnect();
   }, []);
   return solid;
@@ -119,12 +119,9 @@ export function Header() {
   return (
     <header
       data-solid={solid ? "true" : "false"}
-      // `glass` sets a border on every side; keep only the bottom hairline.
-      style={solid ? { borderWidth: "0 0 1px" } : undefined}
       className={cx(
-        "sticky top-0 z-[var(--z-nav)] h-[var(--nav-h)] transition-[background-color,backdrop-filter,border-color] duration-200",
-        // Req 5.11 allowlists the Navbar's glass while solid; transparent and unblurred over the Hook.
-        solid ? "glass" : "border-0 bg-transparent",
+        "sticky top-0 z-[var(--z-nav)] h-[var(--nav-h)] border-b border-border bg-surface/85 backdrop-blur-[var(--glass-blur)]",
+        "transition-[background-color,backdrop-filter,border-color] duration-200",
       )}
     >
       <nav
@@ -134,7 +131,7 @@ export function Header() {
       >
         <a
           href={HOME_HREF}
-          onClick={(event) => onLinkClick(event, HOOK_ID)}
+          onClick={(event) => onLinkClick(event, HOME_ID)}
           className="inline-flex h-11 min-w-11 shrink-0 items-center gap-2 rounded-md font-heading font-bold text-text"
         >
           <CylinderLogo />

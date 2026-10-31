@@ -25,10 +25,11 @@ describe("typewriterFrame", () => {
 
   it("uses the design timing and holds each real line for 2400 ms", () => {
     expect(DEFAULT_TYPE_TIMING).toEqual({ typeMs: 45, holdMs: 2400, deleteMs: 25 });
-    const first = intro.typewriterLines[0];
+    const typewriterLines = ["Data pipelines.", "Trusted decisions.", "Analysis-ready data."] as const;
+    const first = typewriterLines[0];
     const typed = first.length * 45;
-    expect(typewriterFrame(typed, intro.typewriterLines, DEFAULT_TYPE_TIMING)).toEqual({ lineIndex: 0, text: first });
-    expect(typewriterFrame(typed + 2399, intro.typewriterLines, DEFAULT_TYPE_TIMING).text).toBe(first);
+    expect(typewriterFrame(typed, typewriterLines, DEFAULT_TYPE_TIMING)).toEqual({ lineIndex: 0, text: first });
+    expect(typewriterFrame(typed + 2399, typewriterLines, DEFAULT_TYPE_TIMING).text).toBe(first);
   });
 
   it("slices by code point and handles degenerate input", () => {

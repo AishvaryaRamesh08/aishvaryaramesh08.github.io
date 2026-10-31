@@ -1,7 +1,6 @@
 // @vitest-environment node
-// Glass/glow allowlist (Req 5.11): the `glass` and `glow-border` utilities appear only in
-// GlassCard (the component that allowlisted elements render through) and, elsewhere, only behind
-// an interactive-state variant (hover, keyboard focus or pressed).
+// Glass/glow allowlist (Req 5.11): unconditional utilities are limited to GlassCard, the solid
+// Navbar, and the Hero's floating education chip; elsewhere they require an interactive state.
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -12,7 +11,11 @@ const root = process.cwd();
  * Files allowed to apply the utilities unconditionally. Header.tsx: Req 5.11 allowlists the
  * Navbar's glass background while it is solid (Req 7.8); it applies `glass` only in that state.
  */
-const ALLOWED_FILES = new Set(["src/components/GlassCard.tsx", "src/layout/Header.tsx"]);
+const ALLOWED_FILES = new Set([
+  "src/components/GlassCard.tsx",
+  "src/layout/Header.tsx",
+  "src/sections/intro/IntroScreen.tsx",
+]);
 
 /** Tailwind variants that count as an interactive state (hover, keyboard focus, pressed). */
 const STATE_VARIANTS = new Set([
@@ -83,9 +86,16 @@ describe("glass/glow allowlist (Req 5.11)", () => {
     expect(unscopedUses(glassCard).sort()).toEqual(["glass", "glow-border"]);
   });
 
-  it("the Navbar applies only `glass`, never `glow-border`", () => {
+  it("the Navbar uses an opaque tokenized surface instead of the glass utility", () => {
     const header = readFileSync(resolve(root, "src/layout/Header.tsx"), "utf8");
-    expect(unscopedUses(header)).toEqual(["glass"]);
+    expect(unscopedUses(header)).toEqual([]);
+    expect(header).toContain("bg-surface/85");
+    expect(header).toContain("backdrop-blur-[var(--glass-blur)]");
+  });
+
+  it("the Hero does not apply the glass utility", () => {
+    const hero = readFileSync(resolve(root, "src/sections/intro/IntroScreen.tsx"), "utf8");
+    expect(unscopedUses(hero)).toEqual([]);
   });
 
   it("no other source file applies them outside an interactive state", () => {

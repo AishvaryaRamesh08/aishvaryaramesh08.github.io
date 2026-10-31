@@ -17,5 +17,5 @@ export const content: Content = {
     ...valid.dependencyDemo,
     edges: [...valid.dependencyDemo.edges, { from: valid.dependencyDemo.jobs[0].id, to: UNKNOWN_JOB }],
   },
-  journey: [{ label: "Start", approxYear: "2019", detail: "   " }],
+  journey: [{ label: "Start", organization: "Org", role: "Role", years: "2019", detail: [] }],
 };

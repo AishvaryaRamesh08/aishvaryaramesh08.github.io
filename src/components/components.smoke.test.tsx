@@ -20,33 +20,33 @@ afterEach(() => {
 });
 
 describe("SectionShell", () => {
-  it("prerenders the anchor, labelled section, focusable h2 and hidden seam while the body is lazy", () => {
+  it("prerenders the anchor, labelled section and focusable h2 while the body is lazy", () => {
     const load: SectionLoader = () => new Promise(() => {});
-    const html = renderToString(<SectionShell id="story" load={load} />);
+    const html = renderToString(<SectionShell id="contact" load={load} />);
     const host = document.createElement("div");
     host.innerHTML = html;
-    const section = host.querySelector("section#story");
-    expect(section?.getAttribute("aria-labelledby")).toBe("story-heading");
-    const heading = host.querySelector("h2#story-heading");
-    expect(heading?.textContent).toBe(site.sections.story.heading);
+    const section = host.querySelector("section#contact");
+    expect(section?.getAttribute("aria-labelledby")).toBe("contact-heading");
+    const heading = host.querySelector("h2#contact-heading");
+    expect(heading?.textContent).toBe(site.sections.contact.heading);
     expect(heading?.getAttribute("tabindex")).toBe("-1");
     expect(host.querySelector('[aria-busy="true"]')).not.toBeNull();
-    expect(host.querySelector("[data-ticker-seam]")?.getAttribute("aria-hidden")).toBe("true");
+    expect(host.querySelector("[data-ticker-seam]")).toBeNull();
   });
 
-  it("renders the Intro heading as the h1 and labels the Hook by its headline", () => {
+  it("renders the Home heading as the h1 and retains the legacy Hook shell behavior", () => {
     render(
       <>
         <SectionShell id="hook">
           <p id="hook-headline">Headline</p>
         </SectionShell>
-        <SectionShell id="intro">
+        <SectionShell id="home">
           <p>Body</p>
         </SectionShell>
       </>,
     );
     expect(screen.getByRole("region", { name: "Headline" })).toHaveAttribute("id", "hook");
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(site.sections.intro.heading);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(site.sections.home.heading);
   });
 
   it("shows the load error with Retry, keeps the heading, and loads on retry", async () => {
@@ -54,13 +54,13 @@ describe("SectionShell", () => {
     const load = vi.fn<SectionLoader>((attempt) =>
       attempt === 0
         ? Promise.reject(new Error("chunk failed"))
-        : Promise.resolve({ default: () => <p>Story body</p> }),
+        : Promise.resolve({ default: () => <p>Contact body</p> }),
     );
-    render(<SectionShell id="story" load={load} eager />);
+    render(<SectionShell id="contact" load={load} eager />);
     expect(await screen.findByText(ui.sectionLoadError)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 2, name: site.sections.story.heading })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: site.sections.contact.heading })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: ui.retry }));
-    expect(await screen.findByText("Story body")).toBeInTheDocument();
+    expect(await screen.findByText("Contact body")).toBeInTheDocument();
     expect(load).toHaveBeenLastCalledWith(1);
   });
 });

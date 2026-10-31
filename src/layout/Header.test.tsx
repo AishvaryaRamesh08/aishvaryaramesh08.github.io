@@ -26,8 +26,8 @@ function Page() {
     <ThemeProvider>
       <Header />
       <main id="main">
-        <section id="hook" aria-labelledby="hook-headline">
-          <p id="hook-headline">Hook</p>
+        <section id="home" aria-labelledby="home-heading">
+          <h1 id="home-heading">Home</h1>
         </section>
         {site.navGroups.map((group) => (
           <section key={group.id} id={group.sections[0]} aria-labelledby={`${group.sections[0]}-heading`}>
@@ -75,7 +75,7 @@ describe("Navbar", () => {
     expect(screen.getByRole("heading", { name: "Work" })).toHaveFocus();
   });
 
-  it("turns glass once the Hook_Screen leaves the area below the Navbar", () => {
+  it("keeps an opaque, blurred surface nav while tracking whether Home is visible", () => {
     let callback: IntersectionObserverCallback = () => {};
     const observe = vi.fn();
     vi.stubGlobal(
@@ -91,14 +91,15 @@ describe("Navbar", () => {
     );
     render(<Page />);
     const header = screen.getByRole("banner");
-    expect(observe).toHaveBeenCalledWith(document.getElementById("hook"));
+    expect(header).toHaveClass("bg-surface/85", "backdrop-blur-[var(--glass-blur)]", "border-b", "border-border");
+    expect(observe).toHaveBeenCalledWith(document.getElementById("home"));
     expect(header).toHaveAttribute("data-solid", "false");
     act(() => callback([{ isIntersecting: false } as IntersectionObserverEntry], {} as IntersectionObserver));
     expect(header).toHaveAttribute("data-solid", "true");
-    expect(header).toHaveClass("glass");
+    expect(header).toHaveClass("bg-surface/85");
     act(() => callback([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver));
     expect(header).toHaveAttribute("data-solid", "false");
-    expect(header).not.toHaveClass("glass");
+    expect(header).toHaveClass("bg-surface/85");
   });
 });
 
@@ -190,25 +191,19 @@ describe("Navbar active link (Req 7.11)", () => {
     const nav = screen.getByRole("navigation", { name: ui.primaryNav });
     const half = window.innerHeight / 2;
 
-    // Hook is first, then one section per Nav_Group (its first section), in page order.
+    // Home is first, then one section per Nav_Group, in page order.
     layoutSectionsForScroll({
-      hook: 1000,
-      intro: 1000, // Story group
+      home: 1000, // About group
       work: 1000, // Work group
       skills: 1000, // Skills group
       journey: 1000,
-      "built-with-ai": 1000,
-      analysis: 1000,
       contact: 1000,
     });
 
-    // Over the Hook_Screen no link is current (Hook is outside every group).
-    await waitFor(() => {
-      expect(nav.querySelectorAll('a[aria-current="true"]')).toHaveLength(0);
-    });
+    await waitFor(() => expect(nav.querySelector('a[aria-current="true"]')).toHaveTextContent("About"));
 
     // Midpoint inside the Work section → the Work link is current and nothing else is.
-    act(() => scrollWindowTo(2000 + half));
+    act(() => scrollWindowTo(1000 + half));
     await waitFor(() => {
       const current = nav.querySelectorAll('a[aria-current="true"]');
       expect(current).toHaveLength(1);
@@ -216,7 +211,7 @@ describe("Navbar active link (Req 7.11)", () => {
     });
 
     // Midpoint inside the Skills section → the current link moves to Skills.
-    act(() => scrollWindowTo(3000 + half));
+    act(() => scrollWindowTo(2000 + half));
     await waitFor(() => {
       const current = nav.querySelectorAll('a[aria-current="true"]');
       expect(current).toHaveLength(1);

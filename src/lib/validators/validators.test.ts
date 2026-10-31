@@ -14,7 +14,6 @@ import { pipeline } from "../../data/pipeline";
 import { projects } from "../../data/projects";
 import { site } from "../../data/site";
 import { skills } from "../../data/skills";
-import { story } from "../../data/story";
 import { terminal } from "../../data/terminal";
 import { viz } from "../../data/viz";
 import type { ImageAsset, VizStage } from "../../data/types";
@@ -46,7 +45,6 @@ const content: Content = {
   hook,
   hookImages,
   intro,
-  story,
   pipeline,
   projects,
   dependencyDemo,
@@ -80,20 +78,20 @@ describe("content validators", () => {
 
   describe("assets", () => {
     const logo: ImageAsset = { src: "logos/gcp.svg", width: 96, height: 96, alt: "Google Cloud" };
-    const withLogo = { ...content, certifications: [{ ...certifications[0], logo }, ...certifications.slice(1)] };
+    const withLogo = { ...content, certifications: [{ ...certifications[0], badgeImage: logo }, ...certifications.slice(1)] };
 
     it("names a missing referenced file and a missing OG image", () => {
       const fs: FsFacts = { assets: new Map(), publicFiles: new Map() };
       expect(fmt(assetsExist(withLogo, fs))).toEqual([
-        'certifications.ts › [0].logo.src: file "logos/gcp.svg" not found',
+        'certifications.ts › [0].badgeImage.src: file "logos/gcp.svg" not found',
         'site.ts › ogImage.src: file "public/og-image.png" not found',
       ]);
     });
 
     it("reports a file referenced by two entries", () => {
-      const twice = { ...withLogo, certifications: [withLogo.certifications[0], { ...certifications[1], logo }, certifications[2]] };
+      const twice = { ...withLogo, certifications: [withLogo.certifications[0], { ...certifications[1], badgeImage: logo }, certifications[2]] };
       expect(fmt(assetsUnique(twice))).toEqual([
-        'certifications.ts › [1].logo.src: file "logos/gcp.svg" duplicates certifications.ts › [0].logo.src; reuse that entry instead',
+        'certifications.ts › [1].badgeImage.src: file "logos/gcp.svg" duplicates certifications.ts › [0].badgeImage.src; reuse that entry instead',
       ]);
       expect(checkAssetsUnique([{ file: "a.ts", path: "x", src: "/src/assets/a.svg" }, { file: "b.ts", path: "y", src: "a.svg" }])).toHaveLength(1);
     });
@@ -101,7 +99,7 @@ describe("content validators", () => {
     it("checks declared aspect ratios and the OG image size", () => {
       const fs = fsWith({ "logos/gcp.svg": { width: 120, height: 90 } }, { "og-image.png": { width: 1200, height: 600, bytes: 2_000_000 } });
       expect(fmt(intrinsicSize(withLogo, fs))).toEqual([
-        "certifications.ts › [0].logo.src: declared 96×96 (1:1), file is 120×90 (4:3); aspect ratios differ",
+        "certifications.ts › [0].badgeImage.src: declared 96×96 (1:1), file is 120×90 (4:3); aspect ratios differ",
         'site.ts › ogImage.src: "public/og-image.png" is 1200×600; it must be exactly 1200×630',
         'site.ts › ogImage.src: "public/og-image.png" is 2000000 bytes; the limit is 1000000 bytes',
       ]);
@@ -151,10 +149,12 @@ describe("content validators", () => {
 
   it("journey flags an empty array and whitespace-only fields", () => {
     expect(fmt(journey({ journey: [] }))).toEqual(["journey.ts: the Journey_Stage array is empty; add at least one entry"]);
-    const stages = [journeyData[0], { label: "X", approxYear: " \t", detail: "\u00a0" }];
+    const stages = [
+      journeyData[0],
+      { label: "X", organization: "Org", role: "Role", years: " \t", detail: ["valid detail", "valid second detail"] },
+    ];
     expect(fmt(journey({ journey: stages }))).toEqual([
-      "journey.ts › [1].approxYear: Journey_Stage 1: approxYear is empty",
-      "journey.ts › [1].detail: Journey_Stage 1: detail is empty",
+      "journey.ts › [1].years: Journey_Stage 1: years is empty",
     ]);
   });
 
@@ -167,10 +167,10 @@ describe("content validators", () => {
   });
 
   it("certMeaning enforces three entries and the 120-character limit", () => {
-    const certs = [{ ...certifications[0], meaning: "m".repeat(121) }, certifications[1]];
+    const certs = [{ ...certifications[0], description: "m".repeat(121) }, certifications[1]];
     expect(fmt(certMeaning({ certifications: certs }))).toEqual([
       "certifications.ts: 2 certifications (expected exactly 3)",
-      `certifications.ts › [0].meaning: "${certifications[0].name}": meaning is 121 characters (max 120)`,
+      `certifications.ts › [0].description: "${certifications[0].name}": description is 121 characters (max 120)`,
     ]);
   });
 

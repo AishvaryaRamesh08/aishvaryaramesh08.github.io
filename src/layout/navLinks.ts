@@ -23,10 +23,10 @@ export const NAV_LINKS: readonly NavLink[] = site.navGroups.map((group) => ({
 }));
 
 /** Site home; the logo link points here. */
-export const HOME_HREF = BASE_URL;
+export const HOME_HREF = `${BASE_URL}#home`;
 
-/** ID of the Hook_Screen section, the logo's scroll target and the Navbar transparency trigger. */
-export const HOOK_ID: SectionId = "hook";
+/** ID of the Home section, the logo's scroll target and the Navbar transparency trigger. */
+export const HOME_ID: SectionId = "home";
 
 /**
  * True for an unmodified primary-button click, the only kind the menus intercept: modified

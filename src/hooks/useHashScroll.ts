@@ -4,9 +4,8 @@ import { site } from "../data/site";
 import type { SectionId } from "../data/types";
 import { scrollToSection } from "../lib/scrollToSection";
 
-/** Section anchor IDs a fragment may target, in page order (Hook_Screen, then `site.sections`). */
+/** Rendered section IDs a fragment may target, in page order. */
 export const SECTION_ANCHOR_IDS: readonly SectionId[] = [
-  "hook",
   ...(Object.keys(site.sections) as SectionId[]),
 ];
 

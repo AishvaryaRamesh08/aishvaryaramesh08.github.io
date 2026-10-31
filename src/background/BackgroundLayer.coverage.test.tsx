@@ -2,7 +2,7 @@
 // BackgroundLayer.test.tsx. Focus areas (Req 6.1, 6.7, 6.11, 6.13, 6.14, 6.15, 28.8):
 //   - the accessibility + non-interaction contract (aria-hidden root, fixed/pointer-events-none,
 //     no focusables, SVGs focusable="false", canvas aria-hidden),
-//   - the SQL_Ticker side-gutter lanes mount with the required snippets,
+//   - the SQL_Ticker is no longer rendered in the background,
 //   - a failed engine chunk import leaves the layer blank while sibling sections stay intact,
 //   - reduced-motion mounts a static layer (no throw, SVG layers present) and switches live.
 import { render, waitFor } from "@testing-library/react";
@@ -72,14 +72,14 @@ describe("BackgroundLayer accessibility and non-interaction (Req 6.1, 6.13, 28.8
     expect(container.querySelector("canvas")?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("mounts the SQL_Ticker side-gutter lanes with the required snippets", async () => {
+  it("does not render the SQL_Ticker or its scrolling snippets", async () => {
     stubMatchMedia(false);
     stubIntersectionObserver();
     const { BackgroundLayer } = await import("./BackgroundLayer");
-    const { container, getAllByText } = render(<BackgroundLayer />);
-    await waitFor(() => expect(container.querySelectorAll("[data-sql-ticker='y']").length).toBe(2));
-    // A required snippet appears (two copies per lane, two lanes).
-    expect(getAllByText("SELECT * FROM raw.orders;").length).toBeGreaterThanOrEqual(2);
+    const { container, queryByText } = render(<BackgroundLayer />);
+    await waitFor(() => expect(container.querySelector("svg")).not.toBeNull());
+    expect(container.querySelectorAll("[data-sql-ticker='y']")).toHaveLength(0);
+    expect(queryByText("SELECT * FROM raw.orders;")).toBeNull();
   });
 });
 

@@ -15,7 +15,6 @@ import { pipeline } from "../src/data/pipeline.ts";
 import { projects } from "../src/data/projects.ts";
 import { site } from "../src/data/site.ts";
 import { skills } from "../src/data/skills.ts";
-import { story } from "../src/data/story.ts";
 import { terminal } from "../src/data/terminal.ts";
 import { viz } from "../src/data/viz.ts";
 import type { Content } from "../src/lib/validators/types.ts";
@@ -25,7 +24,6 @@ export const content: Content = {
   hook,
   hookImages,
   intro,
-  story,
   pipeline,
   projects,
   dependencyDemo,

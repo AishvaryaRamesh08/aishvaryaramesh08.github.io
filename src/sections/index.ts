@@ -1,16 +1,15 @@
 /**
- * Section registry (design "Component tree", Req 3.1, 32.1): every section from the Hook_Screen
- * to Contact, in Requirement 3 order, with how its body is loaded. `App` renders one
+ * Section registry (design "Component tree", Req 3.1, 32.1): every section from the Hero
+ * to Contact, in page order, with how its body is loaded. `App` renders one
  * `SectionShell` per entry, so each anchor ID and heading is in the prerendered HTML.
  *
- * The Hook_Screen and Intro_Screen are above the fold and bundled eagerly (Req 29.7); every
- * section below the Intro is a `React.lazy` chunk requested within one viewport height (Req 30.2).
+ * The Hero is bundled eagerly; every later section is a `React.lazy` chunk requested within one
+ * viewport height (Req 30.2). HookScreen remains available for a future section but is not mounted.
  */
 import type { ComponentType } from "react";
 import type { SectionLoader, SectionShellId } from "../components/SectionShell";
 import type { SectionId } from "../data/types";
 import { sectionsUpTo } from "../hooks/useHashScroll";
-import HookScreen from "./hook/HookScreen";
 import IntroScreen from "./intro/IntroScreen";
 
 interface SectionEntryBase {
@@ -19,6 +18,8 @@ interface SectionEntryBase {
   layout?: "contained" | "bare";
   /** Whether the section ends with a ticker seam; defaults to true. */
   seam?: boolean;
+  /** The body renders its own section heading, for layouts that place it within their content grid. */
+  headingInBody?: boolean;
 }
 
 /** Body bundled with the entry chunk and rendered as `SectionShell` children. */
@@ -36,16 +37,10 @@ export interface LazySectionEntry extends SectionEntryBase {
 export type SectionEntry = EagerSectionEntry | LazySectionEntry;
 
 export const SECTIONS: readonly SectionEntry[] = [
-  { id: "hook", kind: "eager", Component: HookScreen },
-  { id: "intro", kind: "eager", Component: IntroScreen },
+  { id: "home", kind: "eager", Component: IntroScreen, layout: "bare", headingInBody: true },
   { id: "work", kind: "lazy", load: () => import("./work/FeaturedWork") },
   { id: "skills", kind: "lazy", load: () => import("./skills/SkillConstellation") },
-  { id: "certifications", kind: "lazy", load: () => import("./certifications/Certifications") },
-  { id: "terminal", kind: "lazy", load: () => import("./terminal/TerminalBand") },
   { id: "journey", kind: "lazy", load: () => import("./journey/JourneyChart") },
-  { id: "built-with-ai", kind: "lazy", load: () => import("./built-with-ai/BuiltWithAi") },
-  { id: "analysis", kind: "lazy", load: () => import("./analysis/AnalysisSection") },
-  { id: "story", kind: "lazy", load: () => import("./story/StorySection") },
   { id: "contact", kind: "lazy", load: () => import("./contact/Contact") },
 ];
 
@@ -58,7 +53,7 @@ export const sectionLoaders: Partial<Record<SectionId, SectionLoader>> = Object.
 );
 
 /**
- * Starts loading every lazy section from the Hook_Screen up to and including `target` and
+ * Starts loading every lazy section from the Hero up to and including `target` and
  * resolves once all have settled (rejections are swallowed: the shell shows Retry). Used by
  * `useHashScroll` so a fragment jump lands after the content above it has rendered (Req 3.4).
  */

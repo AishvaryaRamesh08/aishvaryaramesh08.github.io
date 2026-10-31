@@ -6,7 +6,6 @@
 // visible/hidden split, the 50%-in-view trigger, and the landing value.
 import { act, render } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { intro } from "../../data/intro";
 import { StatChip } from "./StatChip";
 
 type IOEntry = Pick<IntersectionObserverEntry, "isIntersecting" | "intersectionRatio">;
@@ -71,7 +70,7 @@ function stubRaf() {
   );
 }
 
-const CHIP = intro.chips[1]; // { finalText: "50+", label: "tables migrated to BigQuery" }
+const CHIP = { finalText: "50+", label: "tables migrated to BigQuery" };
 
 beforeEach(() => {
   stubReducedMotion(false);

@@ -133,7 +133,7 @@ describe("content-validation plugin in vite build", () => {
       expect(failure).toContain("Content_Config validation failed with 3 errors:");
       expect(failure).toContain(`src/data/hook.ts › hookAfter.image.src: file "${MISSING_IMAGE}" not found`);
       expect(failure).toMatch(new RegExp(`src/data/dependencyDemo\\.ts › edges\\[\\d+\\]: .*unknown job "${UNKNOWN_JOB}"`));
-      expect(failure).toContain("src/data/journey.ts › [0].detail: Journey_Stage 0: detail is empty");
+      expect(failure).toContain("src/data/journey.ts › [0].detail: Journey_Stage 0: detail must contain 2 to 4 lines");
     },
     BUILD_TIMEOUT_MS,
   );

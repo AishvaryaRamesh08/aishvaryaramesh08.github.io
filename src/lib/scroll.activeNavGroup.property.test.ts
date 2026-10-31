@@ -1,7 +1,7 @@
 // Feature: portfolio-website, Property 22: Active Nav_Group —
-// for any stack of contiguous section rectangles (Hook, grouped sections, Footer, with arbitrary
+// for any stack of contiguous section rectangles (grouped sections and Footer, with arbitrary
 // positive heights) and any viewport midpoint, resolveActiveNavGroup returns the Nav_Group of the
-// section containing the midpoint, or null when the midpoint lies in the Hook_Screen, the Footer or
+// section containing the midpoint, or null when the midpoint lies in the Footer or
 // outside every section. It never returns more than one group.
 // **Validates: Requirements 7.11**
 import fc from "fast-check";
@@ -13,9 +13,8 @@ import { resolveActiveNavGroup, type SectionRect } from "./scroll";
 /** The real group config, widened from its `satisfies` literal types. */
 const NAV_GROUPS: readonly NavGroup[] = site.navGroups;
 
-/** Page order of the measured sections: Hook, every rendered section, Footer. */
+/** Page order of the measured sections: every rendered section, Footer. */
 const SECTION_ORDER: readonly SectionId[] = [
-  "hook",
   ...(Object.keys(site.sections) as SectionId[]),
   "site-footer",
 ];
@@ -49,15 +48,14 @@ const arbLayout = fc
   });
 
 describe("Property 22: Active Nav_Group", () => {
-  it("each section belongs to at most one Nav_Group, Hook and Footer to none", () => {
+  it("each section belongs to at most one Nav_Group, Footer to none", () => {
     for (const id of SECTION_ORDER) {
       expect(groupsOf(id).length).toBeLessThanOrEqual(1);
     }
-    expect(groupsOf("hook")).toEqual([]);
     expect(groupsOf("site-footer")).toEqual([]);
   });
 
-  it("a midpoint inside a section resolves to that section's group (null for Hook/Footer)", () => {
+  it("a midpoint inside a section resolves to that section's group (null for Footer)", () => {
     fc.assert(
       fc.property(
         arbLayout,

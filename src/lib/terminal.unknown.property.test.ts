@@ -1,8 +1,5 @@
-// Feature: portfolio-website, Property 17: Unknown commands —
-// for any non-blank input whose normalized form is not a supported command, runCommand returns an
-// entry whose output contains the normalized command and all seven supported command names.
-// Applying it through historyReducer leaves all earlier entries unchanged.
-// **Validates: Requirements 24.4**
+// Free-text queries produce search matches or configured no-results feedback without mutating
+// prior scrollback entries.
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import type { TerminalEntry } from "../data/types";
@@ -33,13 +30,17 @@ const arbCore = fc.oneof(
     .map(([cmd, extra, prefix]) => (prefix ? `${extra}${cmd}` : `${cmd}${extra}`)),
 );
 
-/** Raw input whose normalized form is non-blank and not one of the seven supported commands. */
+/** Raw input that is neither a command nor a `goto` request. */
 const arbUnknownInput = fc
   .tuple(arbPadding, arbCore.chain(arbCaseMix), arbPadding)
   .map(([lead, core, trail]) => `${lead}${core}${trail}`)
   .filter((input) => {
     const normalized = normalizeCommand(input);
-    return normalized !== "" && !(TERMINAL_COMMANDS as readonly string[]).includes(normalized);
+    return (
+      normalized !== "" &&
+      !(TERMINAL_COMMANDS as readonly string[]).includes(normalized) &&
+      !normalized.startsWith("goto")
+    );
   });
 
 /** Supported command with optional padding and mixed case. */
@@ -63,10 +64,8 @@ const arbHistory = fc
     ),
   );
 
-const unknownPrefix = "command not found:";
-
-describe("Property 17: Unknown commands", () => {
-  it("returns one line naming the normalized command and listing all seven supported commands", () => {
+describe("Free-text search behavior", () => {
+  it("returns an output entry for arbitrary non-empty queries", () => {
     fc.assert(
       fc.property(arbUnknownInput, (input) => {
         const normalized = normalizeCommand(input);
@@ -75,14 +74,7 @@ describe("Property 17: Unknown commands", () => {
         expect(action.type).toBe("append");
         const { command, output } = action as Extract<TerminalAction, { type: "append" }>;
         expect(command).toBe(normalized);
-        expect(output).toHaveLength(1);
-
-        const [line] = output;
-        expect(line).toBe(defaultTerminalContext.config.unknown(normalized, TERMINAL_COMMANDS));
-        expect(line).toContain(normalized);
-        // The supported list follows the echoed command, so check that tail for every name.
-        const list = line.slice(line.lastIndexOf("Supported commands:"));
-        for (const cmd of TERMINAL_COMMANDS) expect(list).toContain(cmd);
+        expect(output.length).toBeGreaterThan(0);
       }),
     );
   });
@@ -101,15 +93,12 @@ describe("Property 17: Unknown commands", () => {
     );
   });
 
-  it("supported commands never produce the unknown-command message", () => {
+  it("exact commands are not treated as unmatched free text", () => {
     fc.assert(
       fc.property(arbSupportedInput, (input) => {
         const action = runCommand(input, defaultTerminalContext);
-        if (action.type === "append") {
-          for (const line of action.output) expect(line.startsWith(unknownPrefix)).toBe(false);
-        } else {
-          expect(action.type).toBe("clear");
-        }
+        if (normalizeCommand(input) === "clear") expect(action.type).toBe("clear");
+        else expect(action.type).toBe("append");
       }),
     );
   });

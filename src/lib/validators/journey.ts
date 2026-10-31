@@ -1,12 +1,10 @@
 /**
- * `journey` (Req 19.10): the Journey_Stage array is non-empty and every `label`, `approxYear` and
- * `detail` contains a non-whitespace character. Each error identifies the empty array, or the
- * offending index and field.
+ * The Journey_Stage array is non-empty and all required fields contain usable text.
  */
 import { CONTENT_FILES, hasText, validationError, type Content, type ValidationError } from "./types";
 import type { JourneyStage } from "../../data/types";
 
-export const JOURNEY_FIELDS = ["label", "approxYear", "detail"] as const satisfies readonly (keyof JourneyStage)[];
+export const JOURNEY_FIELDS = ["label", "organization", "role", "years"] as const satisfies readonly (keyof JourneyStage)[];
 
 const file = CONTENT_FILES.journey;
 
@@ -21,6 +19,14 @@ export function checkJourney(stages: readonly JourneyStage[]): ValidationError[]
         errors.push(validationError(file, `[${i}].${field}`, `Journey_Stage ${i}: ${field} is empty`));
       }
     }
+    if (stage.detail.length < 2 || stage.detail.length > 4) {
+      errors.push(validationError(file, `[${i}].detail`, `Journey_Stage ${i}: detail must contain 2 to 4 lines`));
+    }
+    stage.detail.forEach((line, detailIndex) => {
+      if (!hasText(line)) {
+        errors.push(validationError(file, `[${i}].detail[${detailIndex}]`, `Journey_Stage ${i}: detail line is empty`));
+      }
+    });
   });
   return errors;
 }

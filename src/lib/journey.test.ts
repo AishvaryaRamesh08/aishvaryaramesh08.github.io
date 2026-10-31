@@ -18,14 +18,19 @@ import {
 
 describe("buildJourneyTrace", () => {
   it("maps the four stages to one hv step trace with a maroon current marker", () => {
-    const { data, layout, config } = buildJourneyTrace(journey);
+    const stages = journey.map((stage) => ({
+      label: stage.label,
+      approxYear: stage.years,
+      detail: stage.detail.join(" "),
+    }));
+    const { data, layout, config } = buildJourneyTrace(stages);
     expect(data).toHaveLength(1);
     const [trace] = data;
     expect(trace).toMatchObject({ type: "scatter", mode: "lines+markers", line: { shape: "hv" } });
     expect(trace.x).toEqual([1, 2, 3, 4]);
     expect(trace.y).toEqual([1, 2, 3, 4]);
-    expect(trace.text).toEqual(["Undergraduate", "Kimberly-Clark", "Wells Fargo", "Texas A&M"]);
-    expect(trace.customdata[3]).toEqual([journey[3].label, journey[3].approxYear, journey[3].detail]);
+    expect(trace.text).toEqual(["Undergraduate", "Internship", "Data engineer", "Graduate student"]);
+    expect(trace.customdata[3]).toEqual([stages[3].label, stages[3].approxYear, stages[3].detail]);
 
     const { dark } = JOURNEY_COLORS;
     expect(trace.marker.color).toEqual([dark.marker, dark.marker, dark.marker, dark.current]);

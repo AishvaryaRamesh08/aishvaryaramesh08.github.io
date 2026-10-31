@@ -6,30 +6,29 @@ import { cx } from "../lib/cx";
 import { ChunkErrorBoundary } from "./ChunkErrorBoundary";
 import { ONE_VIEWPORT_MARGIN } from "./LazyVisibleChunk";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
-import { TickerSeam } from "./TickerSeam";
 
 /** Widened from the `satisfies`-narrowed constant so optional fields such as `minHeight` are readable. */
 const sections: SiteConfig["sections"] = site.sections;
 
-/** Sections wrapped in a SectionShell: Hook_Screen through Contact. */
+/** Sections wrapped in a SectionShell. */
 export type SectionShellId = HeadedSectionId | "hook";
 
 /**
- * Dynamic import of a section body, e.g. `() => import("../sections/StorySection")`. `attempt`
+ * Dynamic import of a section body, e.g. `() => import("../sections/contact/Contact")`. `attempt`
  * is 0 first and increases on each Retry, so a loader can add a cache-busting query if needed.
  */
 export type SectionLoader = (attempt: number) => Promise<{ default: ComponentType }>;
 
-/** The Hook_Screen has no heading element; its visible headline `<p>` carries this ID (Req 3.2). */
-export const HOOK_HEADLINE_ID = "hook-headline";
-
 /** Reserved height for a lazy section without a configured `minHeight`. */
 export const DEFAULT_SECTION_MIN_HEIGHT = "32rem";
 
-/** ID of the element that labels a section: its h1/h2, or the Hook headline. */
+/** ID of the element that labels a section. */
 export function sectionHeadingId(id: SectionShellId): string {
   return id === "hook" ? HOOK_HEADLINE_ID : `${id}-heading`;
 }
+
+/** Retained for the unmounted Hook_Screen component. */
+export const HOOK_HEADLINE_ID = "hook-headline";
 
 interface CommonProps {
   id: SectionShellId;
@@ -37,9 +36,9 @@ interface CommonProps {
   minHeight?: string;
   /** `contained` (default) adds section padding and the page container; `bare` leaves layout to the body. */
   layout?: "contained" | "bare";
+  /** The eager body renders the section heading itself. */
+  headingInBody?: boolean;
   className?: string;
-  /** Render the 56 px SQL_Ticker seam after the content (default true). */
-  seam?: boolean;
 }
 
 export type SectionShellProps = CommonProps &
@@ -61,14 +60,15 @@ export type SectionShellProps = CommonProps &
 
 /**
  * Shared section wrapper (Req 3.2, 3.3, 30.9). Renders `<section id aria-labelledby>` and the
- * section heading from `site.sections` (h1 for the Intro, h2 otherwise, `tabIndex={-1}` so
- * navigation can focus it), so the anchor and accessible name exist in the prerendered HTML even
+ * section heading from `site.sections` (h1 for Home, h2 otherwise, `tabIndex={-1}` so
+ * navigation can focus it), unless an eager body places that heading within its own layout. The
+ * anchor and accessible name exist in the prerendered HTML even
  * while the body chunk is still loading. The body sits in `Suspense` + `ChunkErrorBoundary`: a
  * reserved min-height while pending, and "This section couldn't be loaded" + Retry on failure,
- * with the heading and anchor kept. A ticker seam closes the section.
+ * with the heading and anchor kept.
  */
 export function SectionShell(props: SectionShellProps) {
-  const { id, layout = "contained", className, seam = true } = props;
+  const { id, layout = "contained", className, headingInBody = false } = props;
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const inView = useInViewOnce(sectionRef, { rootMargin: ONE_VIEWPORT_MARGIN });
@@ -102,7 +102,7 @@ export function SectionShell(props: SectionShellProps) {
 
   const headingId = sectionHeadingId(id);
   let heading: ReactNode = null;
-  if (id === "intro") {
+  if (id === "home" && !headingInBody) {
     heading = (
       <h1
         id={headingId}
@@ -110,19 +110,22 @@ export function SectionShell(props: SectionShellProps) {
         tabIndex={-1}
         className="scroll-mt-[var(--nav-h)] font-heading text-hero leading-tight font-bold tracking-tight text-text"
       >
-        {sections.intro.heading}
+        {sections.home.heading}
       </h1>
     );
-  } else if (id !== "hook") {
+  } else if (id !== "hook" && id !== "home") {
     heading = (
-      <h2
-        id={headingId}
-        ref={headingRef}
-        tabIndex={-1}
-        className="mb-8 scroll-mt-[var(--nav-h)] font-heading text-h2 leading-tight font-bold tracking-tight text-text"
-      >
-        {sections[id].heading}
-      </h2>
+      <>
+        <p className="mb-2 font-mono text-xs tracking-wide text-accent-cyan-text">{sections[id].eyebrow}</p>
+        <h2
+          id={headingId}
+          ref={headingRef}
+          tabIndex={-1}
+          className="mb-8 scroll-mt-[var(--nav-h)] font-heading text-h2 leading-tight font-bold tracking-tight text-text"
+        >
+          {sections[id].heading}
+        </h2>
+      </>
     );
   }
 
@@ -140,21 +143,17 @@ export function SectionShell(props: SectionShellProps) {
       ref={sectionRef}
       id={id}
       aria-labelledby={headingId}
-      className={cx("relative z-[var(--z-content)]", className)}
+      className={cx("relative z-[var(--z-content)] scroll-mt-[var(--nav-h)]", className)}
     >
       {layout === "contained" ? (
         <div
-          className={cx(
-            "mx-auto w-full max-w-[var(--container)] px-[var(--gutter)]",
-            id === "hook" ? "py-0" : "py-[var(--section-y)]",
-          )}
+          className="mx-auto w-full max-w-[var(--container)] px-[var(--gutter)] py-[var(--section-y)]"
         >
           {content}
         </div>
       ) : (
         content
       )}
-      {seam ? <TickerSeam sectionId={id} /> : null}
     </section>
   );
 }

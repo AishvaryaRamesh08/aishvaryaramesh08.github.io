@@ -8,7 +8,6 @@
 // **Validates: Requirements 19.6, 19.7, 19.9**
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import type { JourneyStage } from "../data/types";
 import type { Theme } from "./theme";
 import {
   JOURNEY_COLORS,
@@ -16,13 +15,14 @@ import {
   buildJourneyTrace,
   markerPositions,
   type Box,
+  type JourneyTraceStage,
   type Margin,
 } from "./journey";
 
 const themes: Theme[] = ["dark", "light"];
 
 const arbText = fc.string({ minLength: 1, maxLength: 24 });
-const arbStage: fc.Arbitrary<JourneyStage> = fc.record({
+const arbStage: fc.Arbitrary<JourneyTraceStage> = fc.record({
   label: arbText,
   approxYear: arbText,
   detail: fc.string({ minLength: 1, maxLength: 80 }),

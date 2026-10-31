@@ -28,6 +28,8 @@
   --color-maroon: #7a1f33; /* Journey "current" marker fill (Req 5.12) */
   --color-maroon-ring: #a78bfa; /* Journey "current" marker ring */
   --color-focus: #22d3ee; /* focus ring (Req 28.5) */
+  --color-status-danger: #fb7185;
+  --color-status-warning: #fbbf24;
 
   /* ---- Glass ---- */
   --glass-bg: rgb(16 23 42 / 0.62);
@@ -53,6 +55,8 @@
   --color-maroon: #500000;
   --color-maroon-ring: #6d28d9;
   --color-focus: #0e7490;
+  --color-status-danger: #be123c;
+  --color-status-warning: #b45309;
 
   --glass-bg: rgb(255 255 255 / 0.72);
   --glass-border: rgb(15 23 42 / 0.08);
@@ -60,6 +64,11 @@
 
 /* Theme-independent tokens. */
 :root {
+  --terminal-bg: #000000;
+  --terminal-fg: #f2f2f2;
+  --terminal-muted: #9a9a9a;
+  --terminal-prompt: #4ade80;
+
   /* ---- Typography (Req 5.7); each web font is followed by its metric-adjusted fallback ---- */
   --font-heading: "Space Grotesk", "Space Grotesk Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
@@ -72,7 +81,7 @@
   --text-body--line-height: 1.65;
 
   /* ---- Spacing (Tailwind's 4 px base scale is kept) ---- */
-  --section-y: clamp(4rem, 8vw, 8rem);
+  --section-y: clamp(4rem, 6.7vw, 6rem);
   --container: 75rem;
   --gutter: clamp(1rem, 4vw, 2rem);
   --nav-h: 4rem;

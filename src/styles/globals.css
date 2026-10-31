@@ -30,6 +30,8 @@
   --color-maroon: var(--color-maroon);
   --color-maroon-ring: var(--color-maroon-ring);
   --color-focus: var(--color-focus);
+  --color-status-danger: var(--color-status-danger);
+  --color-status-warning: var(--color-status-warning);
 
   --font-heading: var(--font-heading);
   --font-body: var(--font-body);
@@ -74,8 +76,8 @@
     background: var(--gradient-accent);
     /* The build (Lightning CSS) adds the -webkit-mask / -webkit-mask-composite: xor fallback. */
     mask:
-      linear-gradient(#000 0 0) content-box exclude,
-      linear-gradient(#000 0 0);
+      linear-gradient(var(--color-base) 0 0) content-box exclude,
+      linear-gradient(var(--color-base) 0 0);
     pointer-events: none;
   }
 }
@@ -91,6 +93,81 @@
     line-height: var(--text-body--line-height);
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+  }
+
+  .background-scene {
+    mask-image: radial-gradient(ellipse at center, transparent 0%, var(--color-base) 82%);
+  }
+
+  @keyframes hero-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .hero-reveal {
+    animation: hero-fade-up 400ms ease-out both;
+  }
+
+  .hero-copy > [data-hero-item] {
+    animation: hero-fade-up 400ms ease-out both;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(3) {
+    animation-delay: 120ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(4) {
+    animation-delay: 160ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(5) {
+    animation-delay: 200ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(6) {
+    animation-delay: 240ms;
+  }
+
+  .hero-copy > [data-hero-item]:nth-child(7) {
+    animation-delay: 280ms;
+  }
+
+  .terminal-input {
+    caret-color: var(--terminal-fg);
+    caret-shape: block;
+    caret-animation: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-input {
+      caret-animation: manual;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-reveal,
+    .hero-copy > [data-hero-item] {
+      animation: none;
+    }
+  }
+
+  html[data-motion="reduced"] .hero-reveal,
+  html[data-motion="reduced"] .hero-copy > [data-hero-item] {
+    animation: none;
   }
 
   body {

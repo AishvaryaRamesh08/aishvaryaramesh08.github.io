@@ -1,27 +1,19 @@
-// Screen 2, Introduction (Req 9). The page's single h1 (the Owner's name) is rendered by
-// `SectionShell` from `site.sections.intro.heading` (Req 9.1); this body must NOT render another
-// heading. It lays out, below that h1: the title line, the cycling typewriter line, the intro
-// paragraph (or a placeholder), three count-up stat chips, and three CTAs.
-//
-// SSR-safe and hydration-stable: the motion store reports "full" during prerender, the typewriter
-// starts at elapsed 0 and the chips start at their final value (count-up only begins once a chip is
-// in view on the client), so the server and first client render produce the same DOM.
-import { type MouseEvent } from "react";
+import { type MouseEvent, type ReactNode } from "react";
 import { LinkButton } from "../../components/Button";
-import { PlaceholderAsset } from "../../components/PlaceholderAsset";
-import { contact } from "../../data/contact";
 import { intro } from "../../data/intro";
-import type { ContactConfig, SectionId } from "../../data/types";
-import { isPlaceholder } from "../../data/types";
+import type { HeroFocusArea, SectionId } from "../../data/types";
 import { isPlainClick } from "../../layout/navLinks";
 import { scrollToSection } from "../../lib/scrollToSection";
 import { withBase } from "../../lib/url";
-import { StatChip } from "./StatChip";
-import { Typewriter } from "./Typewriter";
+import { TerminalWidget } from "../terminal/TerminalWidget";
 
 const BASE_URL = import.meta.env.BASE_URL;
+const profilePhotos = import.meta.glob<string>("../../assets/profile/headshot.jpg", {
+  eager: true,
+  import: "default",
+  query: "?url",
+});
 
-/** A plain-click CTA that scrolls in-page, with a real `href` so it works without JS / in a new tab. */
 function hrefFor(target: SectionId): string {
   return `${BASE_URL}#${target}`;
 }
@@ -29,70 +21,160 @@ function hrefFor(target: SectionId): string {
 function onCtaClick(event: MouseEvent<HTMLAnchorElement>, target: SectionId): void {
   if (!isPlainClick(event)) return;
   event.preventDefault();
-  // `scrollToSection` moves keyboard focus to the target heading (Req 9.7).
   void scrollToSection(target);
 }
 
-/** The "Download resume" control: a real download link when the PDF is present, else a placeholder. */
-function ResumeCta() {
-  // Widened to the `Slot` so the placeholder guard narrows both branches regardless of the current
-  // Content_Config value (today a placeholder; a real `.pdf` path once the Owner adds one).
-  const slot: ContactConfig["links"]["resumePdf"] = contact.links.resumePdf;
-  // `__RESUME_AVAILABLE__` is true only when the PDF is a real path AND present under /public at
-  // build (Req 9.9, 9.10). A placeholder slot is never available.
-  if (!isPlaceholder(slot) && __RESUME_AVAILABLE__) {
-    return (
-      <LinkButton href={withBase(slot)} download variant="secondary">
-        {intro.ctas.resume}
-      </LinkButton>
-    );
-  }
-  // No file: a labelled Placeholder_Asset with no link to a missing file (Req 9.10).
-  return <PlaceholderAsset expected="resume PDF" variant="button" />;
+function FocusAreaIcon({ icon }: { icon: HeroFocusArea["icon"] }) {
+  const paths: Record<HeroFocusArea["icon"], ReactNode> = {
+    data: (
+      <>
+        <ellipse cx="12" cy="5" rx="8" ry="3" />
+        <path d="M4 5v7c0 1.66 3.58 3 8 3s8-1.34 8-3V5M4 12v7c0 1.66 3.58 3 8 3s8-1.34 8-3v-7" />
+      </>
+    ),
+    ai: <path d="m12 3 1.5 5.5L19 10l-5.5 1.5L12 17l-1.5-5.5L5 10l5.5-1.5L12 3Zm6 11 .8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z" />,
+    analytics: (
+      <>
+        <path d="M4 19V5M4 19h17" />
+        <path d="m7 15 4-4 3 2 5-6" />
+      </>
+    ),
+    visualization: (
+      <>
+        <path d="M4 19V5M4 19h17" />
+        <rect x="7" y="12" width="3" height="5" rx=".5" />
+        <rect x="13" y="9" width="3" height="8" rx=".5" />
+        <rect x="19" y="6" width="2" height="11" rx=".5" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="size-4 shrink-0"
+    >
+      {paths[icon]}
+    </svg>
+  );
 }
 
-/** Intro_Screen body (Req 9). The h1 lives in `SectionShell`; this renders everything under it. */
 export default function IntroScreen() {
-  const paragraph = intro.paragraph;
+  const photo = intro.useMonogramFallback ? undefined : profilePhotos[`../../assets/${intro.photoPath}`];
 
   return (
-    <div data-section-body="intro" className="flex flex-col gap-6">
-      {/* Title line, immediately after the h1 (Req 9.1). */}
-      <p className="text-lg text-text-muted">{intro.titleLine}</p>
+    <div data-section-body="home" className="w-full">
+      <div className="mx-auto grid w-full max-w-[var(--container)] grid-cols-1 items-center gap-8 px-[var(--gutter)] py-6 lg:grid-cols-[7fr_5fr] lg:gap-10 lg:py-10">
+        <div className="hero-copy order-1 flex min-w-0 flex-col items-start gap-4 lg:gap-3">
+          <p
+            data-hero-item
+            className="inline-flex items-center gap-2 rounded-pill border border-border bg-surface/85 px-3 py-1.5 font-mono text-xs leading-5 text-text-muted"
+          >
+            <span aria-hidden="true" className="size-2 rounded-full bg-accent-green-text" />
+            {intro.availability}
+          </p>
 
-      <Typewriter lines={intro.typewriterLines} />
+          <div data-hero-item className="flex min-w-0 items-center gap-4">
+            {photo ? (
+              <img
+                src={photo}
+                alt={intro.photoAlt}
+                className="size-16 shrink-0 rounded-full border-2 border-accent-cyan object-cover lg:size-20"
+                width={80}
+                height={80}
+              />
+            ) : (
+              <span
+                role="img"
+                aria-label={intro.photoAlt}
+                className="flex size-16 shrink-0 items-center justify-center rounded-full border-2 border-accent-cyan bg-surface-2 font-heading text-lg font-bold text-text lg:size-20"
+              >
+                {intro.name
+                  .split(/\s+/)
+                  .map((part) => part[0])
+                  .join("")}
+              </span>
+            )}
+            <h1
+              id="home-heading"
+              tabIndex={-1}
+              className="scroll-mt-[var(--nav-h)] min-w-0 font-heading text-[clamp(2.5rem,5vw,4rem)] leading-[1.05] font-bold tracking-tight text-text"
+            >
+              {intro.name}
+            </h1>
+          </div>
 
-      {isPlaceholder(paragraph) ? (
-        <PlaceholderAsset expected={paragraph.expected} variant="text" />
-      ) : (
-        <p className="max-w-prose text-pretty">{paragraph}</p>
-      )}
+          <p data-hero-item className="text-lg leading-relaxed text-text-muted">
+            {intro.titleLine}
+          </p>
 
-      {/* Three chips in order (Req 9.5); each counts up once when 50% in view (Req 9.6). */}
-      <ul className="m-0 flex list-none flex-wrap gap-3 p-0">
-        {intro.chips.map((chip) => (
-          <li key={chip.label}>
-            <StatChip chip={chip} />
-          </li>
-        ))}
-      </ul>
+          <ul data-hero-item className="m-0 flex w-full flex-wrap gap-2 p-0" aria-label="Focus areas">
+            {intro.focusAreas.map((area) => (
+              <li
+                key={area.label}
+                className="inline-flex min-h-9 items-center gap-2 rounded-pill border border-border bg-surface/85 px-3 py-1.5 text-sm text-text-muted"
+              >
+                <FocusAreaIcon icon={area.icon} />
+                {area.label}
+              </li>
+            ))}
+          </ul>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <LinkButton
-          href={hrefFor("work")}
-          variant="primary"
-          onClick={(event) => onCtaClick(event, "work")}
-        >
-          {intro.ctas.explore}
-        </LinkButton>
-        <LinkButton
-          href={hrefFor("contact")}
-          variant="secondary"
-          onClick={(event) => onCtaClick(event, "contact")}
-        >
-          {intro.ctas.talk}
-        </LinkButton>
-        <ResumeCta />
+          <p data-hero-item className="max-w-[60ch] text-pretty leading-relaxed text-text-muted">
+            {intro.paragraph}
+          </p>
+
+          <div data-hero-item className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <LinkButton
+              href={hrefFor("work")}
+              variant="primary"
+              className="min-h-12 w-full active:translate-y-px sm:w-auto"
+              onClick={(event) => onCtaClick(event, "work")}
+            >
+              {intro.ctas.work}
+            </LinkButton>
+            {intro.resumeUrl ? (
+              <LinkButton
+                href={withBase(intro.resumeUrl)}
+                download
+                variant="secondary"
+                className="min-h-12 w-full active:translate-y-px sm:w-auto"
+              >
+                {intro.ctas.resume}
+              </LinkButton>
+            ) : null}
+            <a
+              href={hrefFor("contact")}
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-pill px-4 font-medium text-accent-cyan-text transition-colors hover:text-text active:translate-y-px sm:w-auto sm:justify-start"
+              onClick={(event) => onCtaClick(event, "contact")}
+            >
+              {intro.ctas.contact}
+            </a>
+          </div>
+
+          <ul className="hero-reveal m-0 grid w-full min-w-0 list-none grid-cols-3 gap-2 p-0">
+            {intro.chips.map((chip) => (
+              <li
+                key={chip.label}
+                className="flex min-w-0 flex-col justify-center gap-1 rounded-card border border-border bg-surface px-2.5 py-3 sm:px-3"
+              >
+                <span className="font-heading text-2xl leading-none font-bold tracking-tight text-text sm:text-3xl">
+                  {chip.finalText}
+                </span>
+                <span className="text-xs leading-snug text-text-muted sm:text-sm">{chip.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="order-2 flex min-w-0 items-center lg:justify-center">
+          <TerminalWidget />
+        </div>
       </div>
     </div>
   );

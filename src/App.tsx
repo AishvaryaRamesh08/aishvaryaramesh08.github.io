@@ -2,10 +2,11 @@
 // Skip link first, then the header/nav, `main#main` with one SectionShell per section in
 // Requirement 3 order, and the footer outside `main`. Render stays deterministic (no Date,
 // window or storage access during render) so the prerendered HTML hydrates without a mismatch.
+import { Fragment } from "react";
 import { BackgroundLayer } from "./background/BackgroundLayer";
-import { SqlTickerProvider } from "./background/SqlTicker";
 import { SectionShell } from "./components/SectionShell";
 import { SkipLink } from "./components/SkipLink";
+import RawToReady from "./sections/raw-to-ready/RawToReady";
 import { MotionProvider } from "./hooks/MotionProvider";
 import { ThemeProvider } from "./hooks/ThemeProvider";
 import { useHashScroll } from "./hooks/useHashScroll";
@@ -21,23 +22,25 @@ export default function App() {
   return (
     <MotionProvider>
       <ThemeProvider>
-        <SqlTickerProvider>
-          <BackgroundLayer />
-          <SkipLink targetId={MAIN_ID} />
-          <Header />
-          <main id={MAIN_ID} tabIndex={-1} className="outline-none">
-            {SECTIONS.map((entry) =>
-              entry.kind === "eager" ? (
-                <SectionShell key={entry.id} id={entry.id} layout={entry.layout} seam={entry.seam}>
-                  <entry.Component />
-                </SectionShell>
-              ) : (
-                <SectionShell key={entry.id} id={entry.id} load={entry.load} layout={entry.layout} seam={entry.seam} />
-              ),
-            )}
-          </main>
-          <Footer />
-        </SqlTickerProvider>
+        <BackgroundLayer />
+        <SkipLink targetId={MAIN_ID} />
+        <Header />
+        <main id={MAIN_ID} tabIndex={-1} className="outline-none">
+          {SECTIONS.map((entry) => {
+            if (entry.kind === "eager") {
+              return (
+                <Fragment key={entry.id}>
+                  <SectionShell id={entry.id} layout={entry.layout} headingInBody={entry.headingInBody}>
+                    <entry.Component />
+                  </SectionShell>
+                  {entry.id === "home" ? <RawToReady /> : null}
+                </Fragment>
+              );
+            }
+            return <SectionShell key={entry.id} id={entry.id} load={entry.load} layout={entry.layout} />;
+          })}
+        </main>
+        <Footer />
       </ThemeProvider>
     </MotionProvider>
   );

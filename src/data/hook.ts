@@ -6,7 +6,7 @@ import type { HookConfig, HookImages } from "./types";
 export const hook = {
   headline: { before: "I turn complex data", after: "into trusted decisions." },
   subline: "I'm Aishvarya. I build reliable pipelines that help people trust their data.",
-  primaryCta: { label: "Meet the engineer ↓", target: "intro" },
+  primaryCta: { label: "Meet the engineer ↓", target: "home" },
   secondaryCta: { label: "Explore featured work", target: "work" },
 } satisfies HookConfig;
 

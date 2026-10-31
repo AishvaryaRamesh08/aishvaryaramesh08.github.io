@@ -26,21 +26,22 @@ describe("scrollProgress", () => {
 
 describe("resolveActiveNavGroup", () => {
   const rects: SectionRect[] = [
-    { id: "hook", top: 0, bottom: 900 },
-    { id: "intro", top: 900, bottom: 1500 },
-    { id: "story", top: 1500, bottom: 2400 },
-    { id: "work", top: 2400, bottom: 3000 },
-    { id: "site-footer", top: 3000, bottom: 3200 },
+    { id: "home", top: 0, bottom: 900 },
+    { id: "work", top: 900, bottom: 1500 },
+    { id: "skills", top: 1500, bottom: 1900 },
+    { id: "journey", top: 1900, bottom: 2100 },
+    { id: "contact", top: 2100, bottom: 2600 },
+    { id: "site-footer", top: 2600, bottom: 2800 },
   ];
 
   it("returns the group of the section containing the midpoint", () => {
-    expect(resolveActiveNavGroup(1600, rects, site.navGroups)).toBe("story");
-    expect(resolveActiveNavGroup(2400, rects, site.navGroups)).toBe("work");
+    expect(resolveActiveNavGroup(100, rects, site.navGroups)).toBe("about");
+    expect(resolveActiveNavGroup(1000, rects, site.navGroups)).toBe("work");
+    expect(resolveActiveNavGroup(1600, rects, site.navGroups)).toBe("skills");
   });
 
-  it("returns null in the Hook_Screen, the Footer and outside every section", () => {
-    expect(resolveActiveNavGroup(100, rects, site.navGroups)).toBeNull();
-    expect(resolveActiveNavGroup(3100, rects, site.navGroups)).toBeNull();
+  it("returns null in the Footer and outside every section", () => {
+    expect(resolveActiveNavGroup(2700, rects, site.navGroups)).toBeNull();
     expect(resolveActiveNavGroup(5000, rects, site.navGroups)).toBeNull();
   });
 });

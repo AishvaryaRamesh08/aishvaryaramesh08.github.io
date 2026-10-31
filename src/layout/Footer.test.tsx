@@ -42,7 +42,7 @@ describe("Footer", () => {
     expect(email).not.toHaveAttribute("target");
   });
 
-  it("back-to-top scrolls to the hook then moves focus to the Skip link", async () => {
+  it("back-to-top scrolls to the Hero then moves focus to the Skip link", async () => {
     const user = userEvent.setup();
     render(
       <>
@@ -51,7 +51,7 @@ describe("Footer", () => {
       </>,
     );
     await user.click(screen.getByRole("button", { name: new RegExp(site.footer.backToTop, "i") }));
-    expect(scrollToSection).toHaveBeenCalledWith("hook", { focus: false });
+    expect(scrollToSection).toHaveBeenCalledWith("home", { focus: false });
     await waitFor(() => {
       const skip = screen.getByRole("link", { name: /skip to content/i });
       expect(skip).toHaveFocus();

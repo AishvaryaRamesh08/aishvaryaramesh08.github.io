@@ -23,7 +23,6 @@ import { pipeline } from "./pipeline";
 import { projects } from "./projects";
 import { site } from "./site";
 import { skills } from "./skills";
-import { story } from "./story";
 import { terminal } from "./terminal";
 import { isPlaceholder, skillIds, type CaseStudy, type HeadedSectionId, type SectionId } from "./types";
 import { viz } from "./viz";
@@ -33,7 +32,6 @@ const content: Content = {
   hook,
   hookImages,
   intro,
-  story,
   pipeline,
   projects,
   dependencyDemo,
@@ -51,29 +49,22 @@ const content: Content = {
 
 // ---------- section IDs (Req 3.1 order) ----------
 
-/** All 13 section anchor IDs in page order. */
+/** All rendered anchor IDs in page order, plus navigation and footer landmarks. */
 const SECTION_ORDER = [
   "site-nav",
-  "hook",
-  "intro",
+  "home",
   "work",
   "skills",
-  "certifications",
-  "terminal",
   "journey",
-  "built-with-ai",
-  "analysis",
-  "story",
   "contact",
   "site-footer",
 ] as const satisfies readonly SectionId[];
 
-// Compile-time check: SECTION_ORDER lists every SectionId.
-type MissingSectionId = Exclude<SectionId, (typeof SECTION_ORDER)[number]>;
+type MissingSectionId = Exclude<Exclude<SectionId, "hook">, (typeof SECTION_ORDER)[number]>;
 const sectionOrderIsExhaustive: [MissingSectionId] extends [never] ? true : false = true;
 
 const HEADED_ORDER = SECTION_ORDER.filter(
-  (id): id is HeadedSectionId => id !== "site-nav" && id !== "hook" && id !== "site-footer",
+  (id): id is HeadedSectionId => id !== "site-nav" && id !== "site-footer",
 );
 
 const ANCHOR_ID = /^[a-z0-9-]+$/;
@@ -86,9 +77,9 @@ const isAscending = (xs: readonly number[]) => xs.every((x, i) => x >= 0 && (i =
 
 describe("Content_Config integrity", () => {
   describe("section IDs (Req 3.3)", () => {
-    it("lists 13 unique anchor IDs of lowercase letters, digits and hyphens", () => {
+    it("lists 7 unique anchor IDs of lowercase letters, digits and hyphens", () => {
       expect(sectionOrderIsExhaustive).toBe(true);
-      expect(SECTION_ORDER).toHaveLength(13);
+      expect(SECTION_ORDER).toHaveLength(7);
       expect(new Set(SECTION_ORDER).size).toBe(SECTION_ORDER.length);
       for (const id of SECTION_ORDER) expect(id).toMatch(ANCHOR_ID);
     });
@@ -107,12 +98,10 @@ describe("Content_Config integrity", () => {
   describe("Nav_Groups (Req 7.2)", () => {
     it("has one group for each navigation label with its assigned sections", () => {
       expect(site.navGroups.map(({ id, label, sections }) => ({ id, label, sections }))).toEqual([
-        { id: "story", label: "Story", sections: ["intro", "story"] },
+        { id: "about", label: "About", sections: ["home"] },
         { id: "work", label: "Work", sections: ["work"] },
-        { id: "skills", label: "Skills", sections: ["skills", "certifications", "terminal"] },
+        { id: "skills", label: "Skills", sections: ["skills"] },
         { id: "journey", label: "Journey", sections: ["journey"] },
-        { id: "built-with-ai", label: "Built with AI", sections: ["built-with-ai"] },
-        { id: "analysis", label: "Analysis", sections: ["analysis"] },
         { id: "contact", label: "Contact", sections: ["contact"] },
       ]);
     });
@@ -221,16 +210,21 @@ describe("Content_Config integrity", () => {
   });
 
   describe("certifications (Req 18.1)", () => {
-    it("lists the three certifications in order with issuers and short meanings", () => {
+    it("lists the three certifications in order with issuers and descriptions", () => {
       expect(certifications.map(({ name, issuer }) => ({ name, issuer }))).toEqual([
-        { name: "Google Cloud Certified – Cloud Digital Leader", issuer: "Google Cloud" },
-        { name: "Microsoft Certified – Azure AI Fundamentals", issuer: "Microsoft" },
-        { name: "Microsoft Certified – Azure Fundamentals", issuer: "Microsoft" },
+        { name: "Cloud Digital Leader", issuer: "Google Cloud Certified" },
+        { name: "Azure AI Fundamentals", issuer: "Microsoft Certified" },
+        { name: "Azure Fundamentals", issuer: "Microsoft Certified" },
       ]);
       for (const c of certifications) {
-        expect(c.meaning.trim(), c.name).not.toBe("");
-        expect([...c.meaning].length, c.name).toBeLessThanOrEqual(120);
+        expect(c.description.trim(), c.name).not.toBe("");
+        expect([...c.description].length, c.name).toBeLessThanOrEqual(120);
       }
+      expect(certifications.map((cert) => cert.description)).toEqual([
+        "Cloud fundamentals and the business value of Google Cloud.",
+        "AI and machine learning concepts and Azure AI services.",
+        "Core Azure services, pricing and governance.",
+      ]);
       expect(new Set(certifications.map((c) => c.id)).size).toBe(3);
     });
   });
@@ -240,27 +234,47 @@ describe("Content_Config integrity", () => {
       expect(journey).toEqual([
         {
           label: "Undergraduate",
-          approxYear: "~2018-2022",
-          detail:
-            'M S Ramaiah Institute of Technology, Bengaluru. B.E. in Electronics & Telecommunication Engineering. Event Coordinator for "Empyreal" tech fest, 50+ volunteers; coursework in Data Structures & Algorithms, OOP, Machine Learning, IoT.',
+          organization: "M S Ramaiah Institute of Technology, Bengaluru",
+          role: "B.E. Electronics & Telecommunication",
+          years: "2018 to 2022",
+          detail: [
+            "GPA 9.19/10.",
+            "Coursework: Data Structures & Algorithms, Object-Oriented Programming, Machine Learning, Internet of Things.",
+            "Event Coordinator for the Empyreal tech fest, managing 50+ volunteers.",
+          ],
         },
         {
-          label: "Kimberly-Clark",
-          approxYear: "~2022",
-          detail:
-            "Graduate Engineer Trainee Intern, Application Operations. Built an org-wide Power BI incident-management dashboard with automated daily refreshes, recognized by the Global CIO.",
+          label: "Internship",
+          organization: "Kimberly-Clark",
+          role: "Graduate Engineer Trainee Intern, Application Operations",
+          years: "2022",
+          detail: [
+            "Built an organization-wide Power BI incident-management dashboard with automated daily refreshes.",
+            "Recognized by the Global CIO.",
+          ],
         },
         {
-          label: "Wells Fargo",
-          approxYear: "~2022-2026",
-          detail:
-            "Senior Software Engineer, Data Engineering (Senior AVP). Led the GenAI Autosys dependency visualizer (Spotlight Award), architected the GCP ELT pipeline migrating 50+ tables, GenAI cohort member running webinars.",
+          label: "Data engineer",
+          organization: "Wells Fargo",
+          role: "Senior Software Engineer, Data Engineering (Senior AVP)",
+          years: "2022 to 2026",
+          detail: [
+            "Built cloud ELT pipelines on GCP and automated ETL at scale.",
+            "Led a GenAI Autosys visualizer (Spotlight Award).",
+            "GenAI cohort member who ran webinars.",
+          ],
         },
         {
-          label: "Texas A&M",
-          approxYear: "~2026-2028 (in progress)",
-          detail:
-            "MS in Management Information Systems, Mays Business School. 4.0 GPA; Advanced Data Management, Advanced Systems Analysis & Design, Project Management; Product@TAMU, Mobile Productivity Leap case challenge.",
+          label: "Graduate student",
+          organization: "Texas A&M University, Mays Business School",
+          role: "MS Management Information Systems",
+          years: "2026 to 2028, in progress",
+          detail: [
+            "GPA 4.0.",
+            "Advanced Data Management, Advanced Systems Analysis & Design, Project Management.",
+            "Product@TAMU team case challenge.",
+          ],
+          current: true,
         },
       ]);
     });
@@ -288,19 +302,18 @@ describe("Content_Config integrity", () => {
   });
 
   describe("emphasis order (Req 31.7)", () => {
-    // Featured work → tech constellation → AI-assisted development → analysis → story.
+    // Featured work → skills → journey → contact.
     it("orders the emphasis sections on the page by priority", () => {
-      const order = ["work", "skills", "built-with-ai", "analysis", "story", "contact"].map((id) =>
+      const order = ["work", "skills", "journey", "contact"].map((id) =>
         HEADED_ORDER.indexOf(id as HeadedSectionId),
       );
       expect(isAscending(order)).toBe(true);
       expect(HEADED_ORDER.indexOf("skills")).toBe(HEADED_ORDER.indexOf("work") + 1);
-      expect(HEADED_ORDER.indexOf("story")).toBe(HEADED_ORDER.indexOf("contact") - 1);
     });
 
     it("orders the emphasis Nav_Groups by priority", () => {
       const labels: string[] = site.navGroups.map((g) => g.label);
-      expect(isAscending(["Work", "Skills", "Built with AI", "Analysis"].map((l) => labels.indexOf(l)))).toBe(true);
+      expect(isAscending(["About", "Work", "Skills", "Journey", "Contact"].map((l) => labels.indexOf(l)))).toBe(true);
     });
 
     it("orders the skill clusters by priority", () => {
@@ -311,7 +324,7 @@ describe("Content_Config integrity", () => {
     });
 
     it("orders the areas by priority in the meta description and Open Graph alt text", () => {
-      expect(isAscending(positions(site.metaDescription, ["pipelines", "visualization", "systems analysis"]))).toBe(true);
+      expect(isAscending(positions(site.metaDescription, ["aishvarya ramesh", "data engineer", "pipelines", "analysis-ready"]))).toBe(true);
       expect(isAscending(positions(site.ogImage.alt, ["data engineer", "analyst", "systems thinker"]))).toBe(true);
     });
   });
@@ -340,6 +353,19 @@ describe("Content_Config integrity", () => {
       expect(skills.clusters.filter((c) => (c.skills as readonly string[]).includes("bigquery"))).toHaveLength(2);
     });
 
+    it("uses the six requested skill groups and their configured labels", () => {
+      expect(skills.clusters.map((cluster) => cluster.name)).toEqual([
+        "Data engineering",
+        "Cloud",
+        "Databases",
+        "Analysis and visualization",
+        "Systems and delivery",
+        "AI/ML",
+      ]);
+      expect(skills.skills.find(({ id }) => id === "pyspark")?.name).toBe("Apache Spark / PySpark");
+      expect(skills.skills.find(({ id }) => id === "etl-elt")?.name).toBe("ETL / ELT");
+    });
+
     it("includes the four required SQL_Ticker snippets", () => {
       for (const snippet of [
         "SELECT * FROM raw.orders;",
@@ -351,8 +377,10 @@ describe("Content_Config integrity", () => {
       }
     });
 
-    it("echoes the normalized command in the unknown-command message", () => {
-      expect(terminal.unknown("foo", ["help", "clear"])).toBe("command not found: foo. Supported commands: help, clear");
+    it("configures common command aliases and no-result feedback", () => {
+      expect(terminal.aliases["who are you"]).toBe("whoami");
+      expect(terminal.aliases.cv).toBe("resume");
+      expect(terminal.noResults("unknown term")).toBe("No results for 'unknown term'. Try: help");
     });
   });
 });

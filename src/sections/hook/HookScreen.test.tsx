@@ -60,7 +60,7 @@ describe("HookScreen", () => {
     renderInSection();
 
     await user.click(screen.getByRole("link", { name: hook.primaryCta.label }));
-    expect(scrollToSection).toHaveBeenCalledWith("intro");
+    expect(scrollToSection).toHaveBeenCalledWith("home");
 
     await user.click(screen.getByRole("link", { name: hook.secondaryCta.label }));
     expect(scrollToSection).toHaveBeenCalledWith("work");

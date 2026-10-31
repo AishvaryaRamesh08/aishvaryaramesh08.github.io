@@ -4,24 +4,20 @@ import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import App from "./App";
 import { site } from "./data/site";
+import { rawToReady } from "./data/rawToReady";
 import { ui } from "./data/ui";
 import { render as prerender } from "./entry-server";
 import { SECTION_ANCHOR_IDS } from "./hooks/useHashScroll";
 import { preloadSectionsUpTo, SECTION_IDS, SECTIONS } from "./sections";
 
-/** Page order: Navigation, Hook_Screen … Contact, Footer. */
+/** Page order: Navigation, Hero, raw-to-ready band, … Contact, Footer. */
 const EXPECTED_IDS = [
   "site-nav",
-  "hook",
-  "intro",
+  "home",
+  "raw-to-ready",
   "work",
   "skills",
-  "certifications",
-  "terminal",
   "journey",
-  "built-with-ai",
-  "analysis",
-  "story",
   "contact",
   "site-footer",
 ];
@@ -50,7 +46,7 @@ describe("app shell in the prerendered HTML", () => {
     expect(main).toHaveAttribute("tabindex", "-1");
   });
 
-  it("renders all 13 anchor IDs, unique and lowercase, in page order", () => {
+  it("renders all anchor IDs, unique and lowercase, in page order", () => {
     const root = prerendered();
     const ids = [...root.querySelectorAll<HTMLElement>("[id]")]
       .map((el) => el.id)
@@ -62,7 +58,7 @@ describe("app shell in the prerendered HTML", () => {
     }
   });
 
-  it("renders Hook through Contact as sections inside main, each labelled by its visible heading", () => {
+  it("renders only the retained sections inside main, each labelled by its visible heading", () => {
     const root = prerendered();
     const main = root.querySelector("main")!;
     const sections = [...main.querySelectorAll("section")];
@@ -74,12 +70,11 @@ describe("app shell in the prerendered HTML", () => {
       expect(section.contains(label)).toBe(true);
       const text = label!.textContent?.trim() ?? "";
       expect(text.length, section.id).toBeGreaterThan(0);
-      if (section.id === "hook") {
-        expect(label!.tagName).toBe("P");
-        expect(label!.id).toBe("hook-headline");
-      } else {
-        expect(text).toBe(site.sections[section.id as keyof typeof site.sections].heading);
-      }
+      const expectedHeading =
+        section.id === "raw-to-ready"
+          ? rawToReady.title
+          : site.sections[section.id as keyof typeof site.sections].heading;
+      expect(text).toBe(expectedHeading);
     }
   });
 
@@ -88,7 +83,13 @@ describe("app shell in the prerendered HTML", () => {
     const h1s = root.querySelectorAll("h1");
     expect(h1s).toHaveLength(1);
     expect(h1s[0]).toHaveTextContent(site.ownerName);
-    expect(root.querySelectorAll("main > section h2")).toHaveLength(EXPECTED_IDS.length - 4);
+    expect(root.querySelectorAll("main > section h2")).toHaveLength(EXPECTED_IDS.length - 3);
+    expect(root.querySelector("#hook")).toBeNull();
+    expect(root.querySelector("#hook-headline")).toBeNull();
+    expect(root.querySelector("#terminal")).toBeNull();
+    expect(root.querySelector("#built-with-ai")).toBeNull();
+    expect(root.querySelector("#analysis")).toBeNull();
+    expect(root.querySelector("#visualization")).toBeNull();
   });
 
   it("makes the Skip link the first focusable element, targeting #main", () => {
@@ -108,14 +109,14 @@ describe("app shell behaviour", () => {
     expect(screen.getByRole("main")).toHaveFocus();
   });
 
-  it("registers Hook and Intro eagerly and every later section as a lazy chunk", () => {
+  it("registers the Hero eagerly and every later section as a lazy chunk", () => {
     expect(SECTION_IDS).toEqual(SECTION_ANCHOR_IDS);
-    expect(SECTIONS.filter((s) => s.kind === "eager").map((s) => s.id)).toEqual(["hook", "intro"]);
+    expect(SECTIONS.filter((s) => s.kind === "eager").map((s) => s.id)).toEqual(["home"]);
   });
 
   it("preloads the lazy chunks up to a target section", async () => {
     const results = (await preloadSectionsUpTo("work")) as PromiseSettledResult<unknown>[];
-    expect(results).toHaveLength(3); // hook, intro (no loader), work
+    expect(results).toHaveLength(2); // home (no loader), work
     const loaded = results.filter((r) => r.status === "fulfilled" && r.value !== undefined);
     expect(loaded).toHaveLength(1);
   });

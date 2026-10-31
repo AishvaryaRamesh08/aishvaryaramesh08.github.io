@@ -58,10 +58,10 @@ function SocialSlot({
   );
 }
 
-/** Scroll to the Hook_Screen then move focus to the first focusable element (the Skip link). Req 22.5, 22.6. */
+/** Scroll to the Hero then move focus to the first focusable element (the Skip link). Req 22.5, 22.6. */
 function backToTopHandler(): void {
   // scrollToSection chooses smooth (full motion) or an instant jump (reduced motion) on its own.
-  void scrollToSection("hook", { focus: false }).then(() => {
+  void scrollToSection("home", { focus: false }).then(() => {
     const skipLink = document.querySelector<HTMLElement>("a[href='#main']");
     skipLink?.focus();
   });

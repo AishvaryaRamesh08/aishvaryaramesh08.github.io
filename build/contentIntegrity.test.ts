@@ -21,7 +21,6 @@ import { pipeline } from "../src/data/pipeline";
 import { projects } from "../src/data/projects";
 import { site } from "../src/data/site";
 import { skills } from "../src/data/skills";
-import { story } from "../src/data/story";
 import { terminal } from "../src/data/terminal";
 import { viz } from "../src/data/viz";
 import { formatValidationError, runValidators, type Content, type FileFacts, type FsFacts } from "../src/lib/validators";
@@ -31,7 +30,6 @@ const content: Content = {
   hook,
   hookImages,
   intro,
-  story,
   pipeline,
   projects,
   dependencyDemo,
