@@ -11,7 +11,7 @@
     "dev": "vite",
     "generate:ohlc": "tsx scripts/generate-ohlc.ts",
     "prebuild": "npm run generate:ohlc",
-    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && tsx scripts/prerender.ts",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && tsx scripts/prerender.ts && tsx scripts/use-static-site.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint .",
