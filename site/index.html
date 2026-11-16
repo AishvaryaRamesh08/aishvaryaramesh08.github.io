@@ -46,7 +46,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
   padding-block:12px;padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:max(var(--gut),env(safe-area-inset-right,0px));z-index:4}
 .bar .home{font-family:var(--display);font-weight:800;font-size:18px;color:var(--text);background:none;border:0;cursor:pointer;padding:4px 0}
 .nav{display:flex;gap:4px;overflow-x:auto;min-width:0;scrollbar-width:none}
-.nav button{font:500 clamp(12px,.72em,16px) var(--mono);color:var(--muted);background:none;border:1px solid transparent;border-radius:99px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.nav button{font:500 clamp(12.5px,.78em,17px) var(--body);color:var(--muted);background:none;border:1px solid transparent;border-radius:99px;padding:6px 12px;cursor:pointer;white-space:nowrap}
 .nav button:hover{color:var(--text)}
 .nav button.on{color:var(--ink);background:var(--c);border-color:var(--c)}
 .panel{box-sizing:border-box;position:absolute;left:0;top:0;bottom:0;width:60%;display:flex;flex-direction:column;justify-content:center;gap:.9em;
@@ -59,23 +59,35 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .pitch{font-family:var(--display);font-weight:600;font-size:2.3em;line-height:1.12;margin:0;text-align:center;text-wrap:balance;max-width:34em}
 .facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 1.4em;width:100%}
 .facts div{border-top:3px solid var(--c);padding-top:.6em;min-width:0}
-.facts span{font-family:var(--mono);font-size:.82em;color:var(--c);display:block;text-transform:uppercase;letter-spacing:.08em}
+.facts span{font-weight:500;font-size:.78em;color:var(--c);display:block;text-transform:uppercase;letter-spacing:.14em}
 .facts b{font-family:var(--display);font-weight:800;font-size:2em;line-height:1.06;display:block;margin:.25em 0 .3em;text-wrap:balance}
 .facts small{font-size:1.02em;color:var(--muted);display:block;line-height:1.35}
 .q{font-family:var(--mono);font-size:.8em;color:var(--accent);margin:0;overflow-wrap:anywhere}
 .q i{font-style:normal;color:var(--muted)}
-h2{font-family:var(--display);font-weight:800;letter-spacing:-.03em;line-height:1;margin:0;text-wrap:balance;font-size:2.5em}
+h2{font-family:var(--display);font-weight:800;letter-spacing:-.035em;line-height:.98;margin:0;text-wrap:balance;font-size:2.5em}
 h2 small{font-family:var(--body);font-weight:400;font-size:max(13px,.36em);letter-spacing:0;color:var(--muted);display:block;margin-top:.5em}
-.path{display:flex;flex-wrap:wrap;align-items:center;gap:.5em;margin:0;font-family:var(--mono);font-size:.82em;color:var(--muted)}
+.path{display:flex;flex-wrap:wrap;align-items:center;gap:.5em;margin:0;font-weight:500;font-size:.8em;color:var(--muted)}
 .path span{border:1px solid var(--line);border-radius:99px;padding:.2em .8em}
 .path .now{background:var(--accent);border-color:var(--accent);color:var(--ink);font-weight:500}
 .path i{font-style:normal;color:var(--accent)}
+.open{display:inline-flex;align-items:center;gap:.6em;margin:0;font-weight:500;font-size:.95em;color:var(--t-cert);border:1px solid var(--t-cert);border-radius:99px;padding:.35em 1em}
+.open::before{content:"";width:.55em;height:.55em;border-radius:50%;background:var(--t-cert)}
+.panel.connect{width:55%}
+.cgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:1.4em;align-items:start}
+.cform{display:flex;flex-direction:column;gap:.55em;background:var(--ink-2);border:1px solid var(--line);border-radius:.7em;padding:1em 1.1em}
+.cform h3{font-family:var(--display);font-weight:600;font-size:1.2em;margin:0 0 .1em}
+.cform input,.cform textarea{font:400 .92em var(--body);color:var(--text);background:var(--ink);border:1px solid var(--line);border-radius:.5em;padding:.6em .8em;min-width:0;resize:none}
+.cform input::placeholder,.cform textarea::placeholder{color:var(--muted)}
+.cform .btn{align-self:flex-start}
+.cform p{margin:0;font-size:.8em;color:var(--muted);min-height:1.3em}
+.cform p.err{color:var(--t-exp)}
+.mailbtn{display:none}
 .btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
 .btn{font:500 max(14px,.8em) var(--body);padding:.7em 1.4em;border-radius:99px;border:1px solid var(--line);background:var(--ink-2);color:var(--text);cursor:pointer;text-decoration:none}
 .btn.primary{background:var(--t-cert);border-color:var(--t-cert);color:var(--ink)}
 .btn:hover{border-color:var(--text)}
 .hint{font-family:var(--mono);font-size:max(12px,.66em);color:var(--muted);margin:0 0 0 8px}
-.sub{color:var(--muted);margin:0;font-size:.9em}
+.sub{color:var(--muted);margin:0;font-size:.92em}
 /* Journey: wide cards stacked on a rail, newest at the top. */
 .journey{display:flex;flex-direction:column;gap:.65em;position:relative;padding-left:1.8em;min-height:0}
 .journey::before{content:"";position:absolute;left:.44em;top:1.2em;bottom:1.2em;width:2px;background:var(--line)}
@@ -83,15 +95,16 @@ h2 small{font-family:var(--body);font-weight:400;font-size:max(13px,.36em);lette
   display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(4.6em,auto);gap:.3em 1.4em;align-items:center}
 .jc::before{content:"";position:absolute;left:-1.72em;top:50%;width:.72em;height:.72em;margin-top:-.36em;transform:rotate(45deg);background:var(--ink);border:2px solid var(--accent);box-sizing:border-box}
 .jc.now::before{background:var(--accent)}
-.journey.tight{font-size:.84em;gap:.45em}
+.journey{font-size:.9em}
+.journey.tight{gap:.45em}
 .journey.tight .jc{padding:.55em 1.1em}
 .jc h3{font-family:var(--display);font-weight:600;font-size:1.2em;line-height:1.12;margin:0;text-wrap:balance}
 .jc .meta{font-size:.8em;color:var(--muted);margin:.3em 0 0;display:block}
-.jc p{margin:0;font-size:.9em;color:#C9D1EC;line-height:1.4}
+.jc p{margin:0;font-size:.92em;color:#C9D1EC;line-height:1.4}
 .jc p b{color:var(--text);font-weight:500}
 .jc .fig{text-align:right}
-.jc .fig b{font-family:var(--display);font-weight:800;font-size:1.9em;line-height:.95;color:var(--accent);display:block;white-space:nowrap}
-.jc .fig span{font-size:.7em;color:var(--muted);display:block;line-height:1.25;margin-top:.25em}
+.jc .fig b{font-family:var(--display);font-weight:800;font-size:2em;line-height:.95;color:var(--accent);display:block;white-space:nowrap}
+.jc .fig span{font-size:.72em;color:var(--muted);display:block;line-height:1.25;margin-top:.25em}
 .cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:.8em;flex:0 1 auto}
 .panel:not(.top):not(.hero) .cards{flex:1 1 auto;max-height:62vh}
 .cards.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -102,21 +115,21 @@ button.card:hover{border-color:var(--accent)}
 .card header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
 .card h3{font-family:var(--display);font-weight:600;font-size:1.2em;line-height:1.15;margin:0;text-wrap:balance}
 .card h3 small{display:block;font-family:var(--body);font-weight:400;font-size:.68em;color:var(--muted);margin-top:.3em}
-.card .num{font-family:var(--display);font-weight:800;font-size:2.1em;line-height:.9;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
-.card .num small{display:block;font-family:var(--body);font-weight:400;font-size:.32em;color:var(--muted);line-height:1.25;margin-top:.5em;white-space:normal;max-width:9em;margin-left:auto}
+.card .num{font-family:var(--display);font-weight:800;font-size:2em;line-height:.9;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.card .num small{display:block;font-family:var(--body);font-weight:400;font-size:.36em;color:var(--muted);line-height:1.25;margin-top:.5em;white-space:normal;max-width:9em;margin-left:auto}
 .card p{margin:0;font-size:.92em;color:#C9D1EC;line-height:1.42}
 .chips{display:flex;flex-wrap:wrap;gap:.4em .45em;font-family:var(--mono);font-size:.74em;color:var(--muted)}
 .chips span{border:1px solid var(--line);border-radius:4px;padding:.1em .5em}
-.tag{display:inline-block;align-self:flex-start;font-family:var(--mono);font-size:.74em;padding:.15em .7em;border-radius:99px;background:var(--accent);color:var(--ink);font-weight:500;white-space:nowrap}
-.links{display:flex;gap:1.1em;font-family:var(--mono);font-size:.82em;margin-top:auto;padding-top:.2em;align-items:center}
+.tag{display:inline-block;align-self:flex-start;font-size:.74em;padding:.2em .8em;border-radius:99px;background:var(--accent);color:var(--ink);font-weight:500;letter-spacing:.01em;white-space:nowrap}
+.links{display:flex;gap:1.1em;font-weight:500;font-size:.84em;margin-top:auto;padding-top:.2em;align-items:center}
 .links a,.links .more{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor}
 .cert{align-items:flex-start}
 .cert .img{width:100%;height:7.5em;border-radius:8px;display:grid;place-items:center;background:var(--ink)}
 .cert .img img{height:6.2em;width:auto;max-width:90%;object-fit:contain}
-.cert small{font-size:.88em;color:var(--muted);display:block}
+.cert small{font-size:.8em;color:var(--muted);display:block}
 /* Skills: every skill at one size, alternating the table colour and white. */
 .col{align-items:center;text-align:center;gap:.9em;padding:1.3em 1.2em}
-.col h3{color:var(--muted);font-size:.74em;font-family:var(--mono);font-weight:500;text-transform:uppercase;letter-spacing:.1em}
+.col h3{color:var(--muted);font-size:.74em;font-family:var(--body);font-weight:500;text-transform:uppercase;letter-spacing:.14em}
 .core{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:.25em .8em;font-family:var(--display);font-weight:600;font-size:1.32em;line-height:1.2;letter-spacing:-.01em}
 .core li{opacity:.15;transform:translateY(.35em);transition:opacity .45s ease,transform .45s ease;transition-delay:calc(var(--i,0)*45ms)}
 .core li:nth-child(odd){color:var(--accent)}
@@ -124,16 +137,16 @@ button.card:hover{border-color:var(--accent)}
 .replay{position:absolute;left:22%;right:22%;top:8%;height:24%;background:none;border:0;cursor:pointer;border-radius:16px}
 .fun{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8em}
 .fun div{background:var(--ink-2);border:1px solid var(--line);border-radius:.7em;padding:1em 1.2em;display:flex;justify-content:space-between;align-items:center;gap:1em}
-.fun b{font-family:var(--display);font-weight:800;font-size:2.6em;line-height:1;color:var(--accent)}
-.fun h3{font-family:var(--display);font-weight:600;font-size:1.25em;margin:0}
-.fun small{color:var(--muted);font-size:.82em;display:block;margin-top:.2em}
-.contact{display:flex;flex-direction:column;gap:.8em;font-family:var(--mono);font-size:1.05em}
+.fun b{font-family:var(--display);font-weight:800;font-size:2em;line-height:1;color:var(--accent)}
+.fun h3{font-family:var(--display);font-weight:600;font-size:1.2em;margin:0}
+.fun small{color:var(--muted);font-size:.8em;display:block;margin-top:.2em}
+.contact{display:flex;flex-direction:column;gap:.7em;font-size:1em}
 .contact div{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:.7em}
-.contact span{color:var(--muted);width:6em;font-size:.78em}
+.contact span{color:var(--muted);width:5.5em;font-size:.74em;font-weight:500;text-transform:uppercase;letter-spacing:.14em}
 .contact b{font-weight:500;user-select:all;overflow-wrap:anywhere}
 .contact a{color:var(--t-cert)}
-.copy{font:500 11px var(--mono);padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:none;color:var(--text);cursor:pointer}
-.built{font-family:var(--mono);font-size:.8em;color:var(--muted);margin:.4em 0 0}
+.copy{font:500 11.5px var(--body);padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:none;color:var(--text);cursor:pointer}
+.built{font-size:.8em;color:var(--muted);margin:.4em 0 0}
 .dk{position:absolute;background:none;border:0;padding:0;cursor:pointer;border-radius:14px;pointer-events:none;z-index:3}
 .dk.on{pointer-events:auto}
 .status{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:12px;
@@ -146,16 +159,16 @@ button.card:hover{border-color:var(--accent)}
   padding:clamp(20px,3vw,36px);display:flex;flex-direction:column;gap:16px;font-size:clamp(14px,1.7vh,17px)}
 .sheet header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
 .sheet h3{font-family:var(--display);font-weight:800;font-size:1.9em;line-height:1.05;margin:6px 0 0;letter-spacing:-.02em;text-wrap:balance}
-.sheet .x{font:500 13px var(--mono);background:none;border:1px solid var(--line);color:var(--text);border-radius:99px;padding:6px 14px;cursor:pointer;white-space:nowrap}
+.sheet .x{font:500 13px var(--body);background:none;border:1px solid var(--line);color:var(--text);border-radius:99px;padding:6px 14px;cursor:pointer;white-space:nowrap}
 .sheet dl{display:grid;grid-template-columns:8em minmax(0,1fr);gap:10px 16px;margin:0}
-.sheet dt{font-family:var(--mono);font-size:.78em;color:var(--t-proj);text-transform:uppercase;letter-spacing:.08em;padding-top:.2em}
+.sheet dt{font-weight:500;font-size:.74em;color:var(--t-proj);text-transform:uppercase;letter-spacing:.14em;padding-top:.2em}
 .sheet dd{margin:0;color:#D5DBF2;line-height:1.5}
 .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-family:var(--mono);font-size:.8em}
 .flow span{border:1px solid var(--t-proj);border-radius:6px;padding:.4em .7em}
 .flow i{font-style:normal;color:var(--t-proj)}
 .nums{display:flex;flex-wrap:wrap;gap:10px 28px}
 .nums div b{font-family:var(--display);font-weight:800;font-size:2em;color:var(--t-proj);display:block;line-height:1}
-.nums div span{font-size:.82em;color:var(--muted)}
+.nums div span{font-size:.8em;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.core li{transition:none}}
 @media (max-width:820px){
   .panel,.panel.top{top:auto !important;width:100%;height:64%;justify-content:flex-end;align-items:stretch;padding-right:0;padding-block:0 38px;gap:.6em}
@@ -177,6 +190,11 @@ button.card:hover{border-color:var(--accent)}
   .fun{grid-template-columns:minmax(0,1fr);padding-right:24px}
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:.7em 1em}
   .contact{padding-right:24px}
+  .panel.connect{width:100%}
+  .cgrid{grid-template-columns:minmax(0,1fr);gap:.8em}
+  .cform{display:none}
+  .mailbtn{display:inline-block;align-self:flex-start}
+  .open{font-size:.85em}
   h2{font-size:1.8em}
   .pitch{font-size:1.5em}
   .facts b{font-size:1.35em}
@@ -220,6 +238,7 @@ button.card:hover{border-color:var(--accent)}
     <section class="panel hero" data-k="0">
       <h1 class="sr">Aishvarya Ramesh</h1>
       <button class="replay" id="replay" type="button" aria-label="Replay the opening animation" title="Replay"></button>
+      <p class="open">Open to internships · Summer 2027</p>
       <p class="pitch">I turn messy data into pipelines, solutions and dashboards people can trust.</p>
       <div class="facts">
         <div style="--c:var(--t-edu)"><span>Now</span><b>MS MIS, Texas A&amp;M</b><small>Mays Business School · GPA 4.0 · 2026 – 28</small></div>
@@ -227,7 +246,7 @@ button.card:hover{border-color:var(--accent)}
         <div style="--c:var(--t-proj)"><span>Recent</span><b>3rd place, Google Makeathon</b><small>AgriLife Research-to-Field · Nov 2026</small></div>
         <div style="--c:var(--t-tool)"><span>Focus</span><b>Data + AI + Business</b><small>Systems · data pipelines · dashboards</small></div>
       </div>
-      <div class="btns"><button class="btn primary" type="button" data-k="8">Contact me</button><button class="btn" type="button" data-k="4">See my work</button><p class="hint">Scroll. Every dot is a record.</p></div>
+      <div class="btns"><button class="btn primary" type="button" data-k="8">Contact me</button><button class="btn" type="button" data-k="4">See my work</button><a class="btn" href="/resume/Aishvarya_Ramesh_Resume.pdf" download>Download resume</a><p class="hint">Scroll. Every dot is a record.</p></div>
     </section>
 
     <section class="panel" data-k="1">
@@ -331,14 +350,26 @@ button.card:hover{border-color:var(--accent)}
       <p class="sub">Scores as of Oct 31, 2026.</p>
     </section>
 
-    <section class="panel" data-k="8" style="--accent:var(--t-cert)">
+    <section class="panel connect" data-k="8" style="--accent:var(--t-cert)">
       <p class="q">INSERT INTO inbox (message) VALUES (…);</p>
-      <h2 style="font-size:5.4em">Let's connect.</h2>
-      <div class="contact">
-        <div><span>email</span><b id="em">Aishvarya.ramesh@tamu.edu</b><button class="copy" data-copy="em" type="button">Copy</button></div>
-        <div><span>personal</span><b id="em2">aishvaryaramesh@gmail.com</b><button class="copy" data-copy="em2" type="button">Copy</button></div>
-        <div><span>linkedin</span><a href="https://linkedin.com/in/aishvarya-ramesh" target="_blank" rel="noopener">linkedin.com/in/aishvarya-ramesh ↗</a></div>
-        <div><span>github</span><a href="https://github.com/AishvaryaRamesh08" target="_blank" rel="noopener">github.com/AishvaryaRamesh08 ↗</a></div>
+      <h2 style="font-size:4em">Let's connect.</h2>
+      <div class="cgrid">
+        <div class="contact">
+          <div><span>email</span><b id="em">Aishvarya.ramesh@tamu.edu</b><button class="copy" data-copy="em" type="button">Copy</button></div>
+          <div><span>personal</span><b id="em2">aishvaryaramesh@gmail.com</b><button class="copy" data-copy="em2" type="button">Copy</button></div>
+          <div><span>linkedin</span><a href="https://linkedin.com/in/aishvarya-ramesh" target="_blank" rel="noopener">linkedin.com/in/aishvarya-ramesh ↗</a></div>
+          <div><span>github</span><a href="https://github.com/AishvaryaRamesh08" target="_blank" rel="noopener">github.com/AishvaryaRamesh08 ↗</a></div>
+          <div><span>resume</span><a href="/resume/Aishvarya_Ramesh_Resume.pdf" download>Download PDF ↓</a></div>
+          <a class="btn primary mailbtn" href="mailto:Aishvarya.ramesh@tamu.edu?subject=Hello%20from%20your%20portfolio">Email me</a>
+        </div>
+        <form class="cform" id="cform" novalidate>
+          <h3>Send me a note</h3>
+          <input id="cf-name" name="name" type="text" autocomplete="name" placeholder="Your name" aria-label="Your name">
+          <input id="cf-email" name="email" type="email" autocomplete="email" placeholder="Your email" aria-label="Your email">
+          <textarea id="cf-msg" name="message" rows="3" placeholder="Role, team, or anything you'd like to ask" aria-label="Message"></textarea>
+          <button class="btn primary" type="submit">Open email draft</button>
+          <p id="cf-note" aria-live="polite">Opens your email app with the message ready to send.</p>
+        </form>
       </div>
       <p class="sub">Select a table on the right to go back to it.</p>
       <p class="built">Built using Claude and Kiro.</p>
@@ -368,14 +399,14 @@ button.card:hover{border-color:var(--accent)}
         ['What I built','A hybrid RAG system on AWS. Each question is routed to MariaDB, ChromaDB and MongoDB in parallel, and Gemini writes an answer with citations. I cleansed messy ERP data into 3NF tables, built a stored procedure that produces 6,199 RAG payloads, embedded the documents into an HNSW vector index and loaded telemetry into an indexed document store.'],
         ['Trust layer','Tagged source citations, "no record" handling and an automatic verifier that checks each generated statement against its source.']],
       flow:['Question','Router','MariaDB · ChromaDB · MongoDB','Gemini','Cited answer','Verifier'],
-      stack:['Gemini','AWS EC2','MariaDB','ChromaDB','MongoDB','SQL','Python'],links:[['GitHub ↗','https://github.com/AishvaryaRamesh08']]},
+      stack:['Gemini','AWS EC2','MariaDB','ChromaDB','MongoDB','SQL','Python'],links:[['Live demo ↗','https://aishvaryaramesh08.github.io/gigavolt-hybrid-rag/'],['GitHub ↗','https://github.com/AishvaryaRamesh08/gigavolt-hybrid-rag']]},
     agri:{tag:'3rd place · Google Makeathon · Nov 2026',title:'AgriLife Research-to-Field',
       nums:[['3rd','place, Google Makeathon'],['2','languages: English and Spanish']],
       rows:[['Problem','Texas A&M AgriLife research is written for researchers. Farmers need guidance for their own county and crop, in plain language.'],
         ['What we built','A mobile-first web app, built with my team, that turns the research into county- and crop-specific guidance with audio, visuals and Spanish support. It includes a grounded chatbot, voice input and live weather.'],
         ['How','Google NotebookLM, Opal, Whisk and AI Studio, with specialist review of the guidance.']],
       flow:['AgriLife research','Grounded AI','Plain-language guidance','County + crop','Audio · Spanish'],
-      stack:['NotebookLM','AI Studio','Opal','Whisk'],links:[['GitHub ↗','https://github.com/AishvaryaRamesh08']]},
+      stack:['NotebookLM','AI Studio','Opal','Whisk'],links:[['Live site ↗','https://aishvaryaramesh08.github.io/AgriLife-Project/'],['GitHub ↗','https://github.com/AishvaryaRamesh08/AgriLife-Project']]},
     stock:{tag:'Jun 2021 – Jun 2022',title:'Stock market analysis and conversational AI assistant',
       nums:[['97.36%','accuracy identifying bullish and bearish engulfing patterns']],
       rows:[['Goal','See real-time and historical stock data and candlestick patterns in one place, and ask for charts in plain words.'],
@@ -521,6 +552,14 @@ button.card:hover{border-color:var(--accent)}
     ['mouseenter','focus'].forEach(function(e){b.addEventListener(e,function(){hoverD=d})});
     ['mouseleave','blur'].forEach(function(e){b.addEventListener(e,function(){if(hoverD===d)hoverD=-1})});
   });
+  // The note form has no server behind it: it writes the message into the visitor's own email app.
+  document.getElementById('cform').addEventListener('submit',function(e){
+    e.preventDefault();
+    var n=document.getElementById('cf-name').value.trim(),m=document.getElementById('cf-email').value.trim(),t=document.getElementById('cf-msg').value.trim(),note=document.getElementById('cf-note');
+    if(!n||!t||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){note.className='err';note.textContent='Add your name, a valid email and a short message first.';return}
+    note.className='';note.textContent='Your email app should open with the message ready. If it does not, copy an address on the left.';
+    window.location.href='mailto:Aishvarya.ramesh@tamu.edu?subject='+encodeURIComponent('Portfolio note from '+n)+'&body='+encodeURIComponent(t+'\n\n'+n+'\n'+m);
+  });
   // Case-study pop-up.
   var modal=document.getElementById('modal'),opener=null;
   function el(tag,text){var e=document.createElement(tag);if(text!=null)e.textContent=text;return e}
@@ -592,7 +631,7 @@ button.card:hover{border-color:var(--accent)}
       }
     }
     // Each table in the database is a button while the database is on screen.
-    var live=la>.5,bh=(H+gap)*ct*k,bl=narrow?cx-R*k-12:cx-(R+26)*k-170,bwid=cx+R*k+16-bl;
+    var live=la>.5,bh=(H+gap)*ct*k,bl=narrow?cx-R*k-12:cx-(R+26)*k-135,bwid=cx+R*k+16-bl;
     for(var d3=0;d3<D;d3++){var bt=dks[d3];
       if(bt._on!==live){bt._on=live;bt.classList.toggle('on',live);bt.tabIndex=live?0:-1;if(!live&&hoverD===d3)hoverD=-1}
       if(live){bt.style.left=bl+'px';bt.style.width=bwid+'px';bt.style.top=(cy+((d3-(D-1)/2)*(H+gap))*ct*k-bh/2-(narrow?H*.5*k:0))+'px';bt.style.height=bh+'px'}}
