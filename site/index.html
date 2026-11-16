@@ -52,11 +52,11 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .panel{box-sizing:border-box;position:absolute;left:0;top:0;bottom:0;width:60%;display:flex;flex-direction:column;justify-content:center;gap:.9em;
   padding-left:max(var(--gut),env(safe-area-inset-left,0px));padding-right:12px;padding-block:60px 38px;
   opacity:0;pointer-events:none;will-change:opacity,transform;z-index:2}
-.panel.hero{opacity:1;width:100%;justify-content:center;align-items:center;gap:1.5em;
-  padding-right:max(var(--gut),env(safe-area-inset-right,0px));padding-block:33vh 56px}
+.panel.hero{opacity:1;width:100%;justify-content:center;align-items:center;gap:1.6em;
+  padding-right:max(var(--gut),env(safe-area-inset-right,0px));padding-block:44vh 64px}
 .panel.top{width:100%;align-items:center;justify-content:flex-start;padding-right:max(var(--gut),env(safe-area-inset-right,0px));padding-block:0 44px}
 .panel.top>*{width:min(100%,var(--bw,90%))}
-.pitch{font-family:var(--display);font-weight:600;font-size:2.3em;line-height:1.12;margin:0;text-align:center;text-wrap:balance;max-width:34em}
+.pitch{font-family:var(--display);font-weight:600;font-size:2.5em;line-height:1.1;margin:0;text-align:center;text-wrap:balance;max-width:26em}
 .facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 1.4em;width:100%}
 .facts div{border-top:3px solid var(--c);padding-top:.6em;min-width:0}
 .facts span{font-weight:500;font-size:.78em;color:var(--c);display:block;text-transform:uppercase;letter-spacing:.14em}
@@ -82,6 +82,14 @@ h2 small{font-family:var(--body);font-weight:400;font-size:max(13px,.36em);lette
 .cform p{margin:0;font-size:.8em;color:var(--muted);min-height:1.3em}
 .cform p.err{color:var(--t-exp)}
 .mailbtn{display:none}
+.creds{display:flex;flex-wrap:wrap;justify-content:center;gap:.5em 2.4em;margin:0;font-size:1.12em;color:var(--muted)}
+.creds span{display:inline-flex;align-items:baseline;gap:.5em}
+.creds span::before{content:"";width:.5em;height:.5em;border-radius:50%;background:var(--c);align-self:center;flex:none}
+.creds b{color:var(--text);font-weight:500}
+.tlink{font-weight:500;font-size:max(14px,.8em);color:var(--text);text-decoration:none;border-bottom:1px solid var(--muted);padding-bottom:2px;margin-left:.8em}
+.tlink:hover{border-color:var(--text)}
+.avail{display:inline-flex;align-items:center;gap:.6em;color:var(--text)}
+.avail::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--t-cert)}
 .btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center}
 .btn{font:500 max(14px,.8em) var(--body);padding:.7em 1.4em;border-radius:99px;border:1px solid var(--line);background:var(--ink-2);color:var(--text);cursor:pointer;text-decoration:none}
 .btn.primary{background:var(--t-cert);border-color:var(--t-cert);color:var(--ink)}
@@ -134,7 +142,7 @@ button.card:hover{border-color:var(--accent)}
 .core li{opacity:.15;transform:translateY(.35em);transition:opacity .45s ease,transform .45s ease;transition-delay:calc(var(--i,0)*45ms)}
 .core li:nth-child(odd){color:var(--accent)}
 .live .core li{opacity:1;transform:none}
-.replay{position:absolute;left:22%;right:22%;top:8%;height:24%;background:none;border:0;cursor:pointer;border-radius:16px}
+.replay{position:absolute;left:16%;right:16%;top:12%;height:30%;background:none;border:0;cursor:pointer;border-radius:16px}
 .fun{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8em}
 .fun div{background:var(--ink-2);border:1px solid var(--line);border-radius:.7em;padding:1em 1.2em;display:flex;justify-content:space-between;align-items:center;gap:1em}
 .fun b{font-family:var(--display);font-weight:800;font-size:2em;line-height:1;color:var(--accent)}
@@ -196,7 +204,10 @@ button.card:hover{border-color:var(--accent)}
   .mailbtn{display:inline-block;align-self:flex-start}
   .open{font-size:.85em}
   h2{font-size:1.8em}
-  .pitch{font-size:1.5em}
+  .pitch{font-size:1.7em}
+  .creds{flex-direction:column;align-items:center;gap:.4em;font-size:1em;text-align:center}
+  .creds span{display:block}
+  .creds span::before{display:inline-block;margin-right:.5em;vertical-align:middle}
   .facts b{font-size:1.35em}
   .core{font-size:1.4em}
   .sheet dl{grid-template-columns:minmax(0,1fr);gap:2px 0}
@@ -238,15 +249,9 @@ button.card:hover{border-color:var(--accent)}
     <section class="panel hero" data-k="0">
       <h1 class="sr">Aishvarya Ramesh</h1>
       <button class="replay" id="replay" type="button" aria-label="Replay the opening animation" title="Replay"></button>
-      <p class="open">Open to internships · Summer 2027</p>
       <p class="pitch">I turn messy data into pipelines, solutions and dashboards people can trust.</p>
-      <div class="facts">
-        <div style="--c:var(--t-edu)"><span>Now</span><b>MS MIS, Texas A&amp;M</b><small>Mays Business School · GPA 4.0 · 2026 – 28</small></div>
-        <div style="--c:var(--t-exp)"><span>Previously</span><b>Senior Software Engineer, Data Engineering</b><small>Wells Fargo · 4+ years · Spotlight Award</small></div>
-        <div style="--c:var(--t-proj)"><span>Recent</span><b>3rd place, Google Makeathon</b><small>AgriLife Research-to-Field · Nov 2026</small></div>
-        <div style="--c:var(--t-tool)"><span>Focus</span><b>Data + AI + Business</b><small>Systems · data pipelines · dashboards</small></div>
-      </div>
-      <div class="btns"><button class="btn primary" type="button" data-k="8">Contact me</button><button class="btn" type="button" data-k="4">See my work</button><a class="btn" href="/resume/Aishvarya_Ramesh_Resume.pdf" download>Download resume</a><p class="hint">Scroll. Every dot is a record.</p></div>
+      <p class="creds"><span style="--c:var(--t-edu)"><b>MS MIS</b> at Texas A&amp;M</span><span style="--c:var(--t-exp)"><b>Senior Software Engineer, Data Engineering</b> previously at Wells Fargo</span></p>
+      <div class="btns"><button class="btn primary" type="button" data-k="4">See my work</button><a class="tlink" href="/resume/Aishvarya_Ramesh_Resume.pdf" download>Resume ↓</a></div>
     </section>
 
     <section class="panel" data-k="1">
@@ -371,11 +376,11 @@ button.card:hover{border-color:var(--accent)}
           <p id="cf-note" aria-live="polite">Opens your email app with the message ready to send.</p>
         </form>
       </div>
-      <p class="sub">Select a table on the right to go back to it.</p>
+      <p class="sub">Open to internships for summer 2027. Select a table on the right to go back to it.</p>
       <p class="built">Built using Claude and Kiro.</p>
     </section>
 
-    <div class="status"><span id="st">aishvarya.db · 5 tables · 6,000 records</span><span id="pc">0%</span></div>
+    <div class="status"><span class="avail">Open to internships · Summer 2027</span><span id="pc">0%</span></div>
   </div>
 </div>
 
@@ -585,7 +590,7 @@ button.card:hover{border-color:var(--accent)}
     var q0=pS;paint(q0);
     var narrow=W<820,k=narrow?Math.min(W/600,Hh/1300):Math.min(W/1350,Hh/740);
     var cx=narrow?W*.5:W*.795,cy=narrow?Hh*.19:Hh*.53;
-    var hW=narrow?Math.min(W*.8,Hh*.14/nameT.aspect):Math.min(W*.5,Hh*.2/nameT.aspect),hx=W*.5,hy=narrow?Hh*.15:Hh*.2;
+    var hW=narrow?Math.min(W*.88,Hh*.18/nameT.aspect):Math.min(W*.66,Hh*.27/nameT.aspect),hx=W*.5,hy=narrow?Hh*.2:Hh*.27;
     var u=q0*U,nameAmt=1-ss(.12,.8,u),ex=ss(.35,.9,u),open=ss(1.15,1.85,u)*(1-ss(7.15,7.8,u));
     // Chapter position: whole numbers while a chapter holds, fractions while one mark becomes the next.
     var cu=Math.min(C-1,Math.max(0,u-2)),ci=Math.floor(cu),c=ci+ss(.12,.88,cu-ci);
