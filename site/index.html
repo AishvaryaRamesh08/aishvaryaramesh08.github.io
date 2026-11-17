@@ -64,7 +64,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .facts span{font-weight:500;font-size:.78em;color:var(--c);display:block;text-transform:uppercase;letter-spacing:.14em}
 .facts b{font-family:var(--display);font-weight:800;font-size:1.75em;line-height:1.08;display:block;margin:.25em 0 .3em;text-wrap:balance}
 .facts small{font-size:.95em;color:var(--muted);display:block;line-height:1.35}
-.facts em{font-style:normal;font-weight:600;color:var(--c)}
+.facts small.big{font-size:1.18em;font-weight:500;color:var(--text);margin-bottom:.3em}
 .q{font-family:var(--mono);font-size:.8em;color:var(--accent);margin:0;overflow-wrap:anywhere}
 .q i{font-style:normal;color:var(--muted)}
 h2{font-family:var(--display);font-weight:800;letter-spacing:-.035em;line-height:.98;margin:0;text-wrap:balance;font-size:2.5em}
@@ -123,7 +123,9 @@ h2 small{font-family:var(--body);font-weight:400;font-size:max(13px,.36em);lette
 .card{background:var(--ink-2);border:1px solid var(--line);border-radius:.7em;padding:1.1em 1.2em;display:flex;flex-direction:column;gap:.55em;min-width:0;text-align:left;color:inherit;font-size:1em}
 button.card{cursor:pointer}
 button.card:hover{border-color:var(--accent)}
-.proj{padding:0;gap:0;overflow:hidden}
+.proj{padding:0;gap:0;overflow:hidden;cursor:pointer}
+.proj:hover{border-color:var(--accent)}
+.links button.more{font:inherit;background:none;border:0;border-bottom:1px solid currentColor;padding:0;cursor:pointer}
 .proj img{display:block;width:100%;aspect-ratio:16/8.6;object-fit:cover;object-position:top left;border-bottom:1px solid var(--line);transition:transform .5s ease}
 .proj:hover img{transform:scale(1.035)}
 .pb{display:flex;flex-direction:column;gap:.55em;padding:1em 1.2em 1.1em;flex:1}
@@ -206,6 +208,7 @@ button.card:hover{border-color:var(--accent)}
   .facts small,.hint,.replay{display:none}
   .fun{grid-template-columns:minmax(0,1fr);padding-right:24px}
   .facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:.7em 1em}
+  .facts small.big{display:block;font-size:.92em;margin:0}
   .contact{padding-right:24px}
   .panel.connect{width:100%}
   .cgrid{grid-template-columns:minmax(0,1fr);gap:.8em}
@@ -260,10 +263,10 @@ button.card:hover{border-color:var(--accent)}
       <h1 class="sr">Aishvarya Ramesh</h1>
       <button class="replay" id="replay" type="button" aria-label="Replay the opening animation" title="Replay"></button>
       <div class="facts">
-        <div style="--c:var(--t-edu)"><span>Now</span><b>MS MIS, Texas A&amp;M</b><small><em>4.0</em> GPA · Mays Business School</small></div>
-        <div style="--c:var(--t-exp)"><span>Previously</span><b>Senior Software Engineer, Data Engineering</b><small><em>50+</em> tables to BigQuery · <em>75%</em> less build time</small></div>
-        <div style="--c:var(--t-proj)"><span>Recent</span><b>3rd place, Google Makeathon</b><small>AgriLife Research-to-Field · Nov 2026</small></div>
-        <div style="--c:var(--t-tool)"><span>Focus</span><b>Data + AI + Business</b><small><em>100%</em> of RAG answers traced to a source</small></div>
+        <div style="--c:var(--t-edu)"><span>Now</span><b>MS MIS, Texas A&amp;M</b><small class="big">Mays Business School · GPA 4.0</small><small>Data management · Systems analysis · Project management</small></div>
+        <div style="--c:var(--t-exp)"><span>Previously</span><b>Senior Software Engineer, Data Engineering</b><small class="big">Wells Fargo · 4+ years</small><small>GCP · Python · SQL · BigQuery · Airflow · PySpark</small></div>
+        <div style="--c:var(--t-proj)"><span>Recent</span><b>3rd place, Google Makeathon</b><small class="big">AgriLife Research-to-Field</small><small>Nov 2026 · team build with Google AI tools</small></div>
+        <div style="--c:var(--t-tool)"><span>Focus</span><b>Data + AI + Business</b><small class="big">Engineering · Analytics · Visualization</small></div>
       </div>
       <div class="btns"><button class="btn primary" type="button" data-k="4">See my work</button><a class="tlink" href="/resume/Aishvarya_Ramesh_Resume.pdf" download>Resume ↓</a></div>
     </section>
@@ -318,21 +321,21 @@ button.card:hover{border-color:var(--accent)}
 
     <section class="panel top" id="projects" data-k="4" style="--accent:var(--t-proj);top:27%">
       <div class="cards c3">
-        <button class="card proj" type="button" data-case="giga"><img src="/projects/gigavolt.webp" alt="Hybrid RAG for Enterprise Data: a question answered with sources from three databases" loading="lazy">
+        <article class="card proj" data-case="stock"><img src="/projects/stockmarketview.webp" alt="StockMarketView: a live candlestick chart with moving averages and pattern markers" loading="lazy">
+          <div class="pb"><header><h3>StockMarketView<small>Stock charts · v1 by hand, 2021 · v2 in 2026</small></h3><span class="tag">Rebuilt with AI</span></header>
+          <p>Stock charts with indicators and candlestick patterns marked on the chart. Rebuilt with AI and running as a live website.</p>
+          <div class="chips"><span>Plotly</span><span>Dash</span><span>Random Forest</span><span>Claude</span></div>
+          <div class="links"><button class="more" type="button">Case study →</button><a href="https://stockmarketview-v2.aishvaryaramesh.workers.dev/" target="_blank" rel="noopener">Live site ↗</a></div></div></article>
+        <article class="card proj" data-case="giga"><img src="/projects/gigavolt.webp" alt="Hybrid RAG for Enterprise Data: a question answered with sources from three databases" loading="lazy">
           <div class="pb"><header><h3>Hybrid RAG for Enterprise Data<small>Project Gigavolt · Fall 2026 · AWS</small></h3><span class="num">100%<small>of statements traced to a source</small></span></header>
           <p>Ask in plain English; get one answer drawn from SQL records, PDF manuals and sensor telemetry, with a source behind every statement.</p>
           <div class="chips"><span>Gemini</span><span>MariaDB</span><span>ChromaDB</span><span>MongoDB</span><span>AWS</span></div>
-          <div class="links"><span class="more">Case study →</span></div></div></button>
-        <button class="card proj" type="button" data-case="agri"><img src="/projects/agrilife.webp" alt="AgriLife Research-to-Field: research publications turned into quick takeaways for farmers" loading="lazy">
+          <div class="links"><button class="more" type="button">Case study →</button><a href="https://aishvaryaramesh08.github.io/gigavolt-hybrid-rag/" target="_blank" rel="noopener">Live site ↗</a></div></div></article>
+        <article class="card proj" data-case="agri"><img src="/projects/agrilife.webp" alt="AgriLife Research-to-Field: research publications turned into quick takeaways for farmers" loading="lazy">
           <div class="pb"><header><h3>AgriLife Research-to-Field<small>Google Makeathon · Nov 2026</small></h3><span class="num">3rd<small>place</small></span></header>
           <p>Turns Texas A&amp;M AgriLife research into county- and crop-specific guidance for farmers, with audio and Spanish.</p>
           <div class="chips"><span>NotebookLM</span><span>AI Studio</span><span>Opal</span><span>Whisk</span></div>
-          <div class="links"><span class="more">Case study →</span></div></div></button>
-        <button class="card proj" type="button" data-case="stock"><img src="/projects/stockmarketview.webp" alt="StockMarketView v2: a live candlestick chart with indicators and pattern markers" loading="lazy">
-          <div class="pb"><header><h3>StockMarketView<small>v1 by hand, 2021 · v2 rebuilt with AI, 2026</small></h3><span class="num">4<small>exchanges, live</small></span></header>
-          <p>Live stock charts for India and the US with indicators and candlestick patterns. v2 is a rebuild with Claude Opus and Fable.</p>
-          <div class="chips"><span>Plotly</span><span>Dash</span><span>Random Forest</span><span>Claude</span></div>
-          <div class="links"><span class="more">Case study →</span></div></div></button>
+          <div class="links"><button class="more" type="button">Case study →</button><a href="https://aishvaryaramesh08.github.io/AgriLife-Project/" target="_blank" rel="noopener">Live site ↗</a></div></div></article>
       </div>
     </section>
 
@@ -429,9 +432,9 @@ button.card:hover{border-color:var(--accent)}
       stack:['NotebookLM','AI Studio','Opal','Whisk'],links:[['Live site ↗','https://aishvaryaramesh08.github.io/AgriLife-Project/'],['GitHub ↗','https://github.com/AishvaryaRamesh08/AgriLife-Project']]},
     stock:{tag:'v1 2021 – 22 · v2 2026',title:'StockMarketView: stock analysis, rebuilt with AI',
       img:'/projects/stockmarketview.webp',alt:'StockMarketView v2 showing a candlestick chart with moving averages and engulfing patterns marked',
-      nums:[['97.36%','v1 classifier accuracy on engulfing patterns'],['4','exchanges in v2: NSE, BSE, NYSE, NASDAQ'],['30 s','live refresh while the market is open']],
+      nums:[['Live','v2 website, rebuilt with AI'],['97.36%','v1 classifier accuracy on engulfing patterns'],['30 s','chart refresh while the market is open']],
       rows:[['v1, by hand','An interactive Python platform in Plotly and Dash for real-time and historical data and candlestick patterns, a Random Forest classifier for bullish and bearish engulfing patterns, and a Rasa assistant that fetches charts from a voice or text request.'],
-        ['v2, with AI','A revamped version built with Claude Opus and Fable. Free live charts for India and the US, indicators, candlestick patterns marked on the chart, a plain-English summary, watchlists, and a daily scan of NIFTY 500 and S&P 500 stocks for patterns.'],
+        ['v2, with AI','A revamped version built with Claude Opus and Fable, running as a live website. Stock charts with indicators, candlestick patterns marked on the chart, a plain-English summary, watchlists, and a daily scan of NIFTY 500 and S&P 500 stocks for patterns.'],
         ['Why both','The same problem solved twice, 5 years apart: once writing every line, once directing AI. A v1-versus-v2 comparison is in progress.']],
       flow:['Market data','Indicators','Pattern detection','Plain-English summary','Chart'],
       stack:['Python','Plotly','Dash','Random Forest','Rasa','Claude Opus','Claude Fable'],links:[['Live v2 ↗','https://stockmarketview-v2.aishvaryaramesh.workers.dev/'],['GitHub v2 ↗','https://github.com/AishvaryaRamesh08/StockMarketView-v2'],['GitHub v1 ↗','https://github.com/AishvaryaRamesh08/StockMarketView']]}
@@ -472,7 +475,7 @@ button.card:hover{border-color:var(--accent)}
     }
     var data=o.getImageData(0,0,CW,CH).data,filled=0,x,y,k;
     for(y=0;y<CH;y+=2)for(x=0;x<CW;x+=2){k=(y*CW+x)*4;if(s.raw?data[k+3]>128:(data[k]>128||data[k+1]>128||data[k+2]>128))filled+=4}
-    var step=Math.max(2,Math.sqrt(filled/N)*1.012),cells=[];
+    var step=Math.max(2,Math.sqrt(filled/(s.n||N))*1.012),cells=[];
     for(y=step/2;y<CH;y+=step)for(x=step/2;x<CW;x+=step){k=((y|0)*CW+(x|0))*4;
       var u=(x-CW/2)/CW,v=(y-CH/2)/CW,c;
       if(s.raw){if(data[k+3]>128)cells.push([u,v,data[k],data[k+1],data[k+2],1])}
@@ -530,9 +533,9 @@ button.card:hover{border-color:var(--accent)}
     wordT=[
       make({custom:pic(tamuImg,1.45),raw:true}),
       make({custom:pic(wfImg,1),raw:true}),
-      make({lines:['PROJECTS'],align:'center',color:RGB[2],top:.17,hf:.115}),
+      make({lines:['PROJECTS'],align:'center',color:RGB[2],top:.17,hf:.115,n:1700}),
       make({custom:tree,color:RGB[3],color2:[255,255,255],top:.28,hf:.34}),
-      make({lines:['CERTIFICATIONS'],align:'center',color:RGB[4],top:.2,hf:.15}),
+      make({lines:['CERTIFICATIONS'],align:'center',color:RGB[4],top:.2,hf:.15,n:3000}),
       make({custom:owl,raw:true})
     ];
     // On a phone the three branches are too small to read, so the skills mark stacks instead.
@@ -601,7 +604,7 @@ button.card:hover{border-color:var(--accent)}
     modal.hidden=false;document.getElementById('mx').focus();
   }
   function closeCase(){modal.hidden=true;if(opener)opener.focus()}
-  [].forEach.call(document.querySelectorAll('[data-case]'),function(b){b.addEventListener('click',function(){openCase(b.dataset.case,b)})});
+  [].forEach.call(document.querySelectorAll('[data-case]'),function(b){b.addEventListener('click',function(e){if(e.target.closest('a'))return;openCase(b.dataset.case,b.querySelector('.more')||b)})});
   document.getElementById('mx').addEventListener('click',closeCase);
   modal.addEventListener('click',function(e){if(e.target===modal)closeCase()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!modal.hidden)closeCase()});
