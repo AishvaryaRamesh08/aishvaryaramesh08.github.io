@@ -636,7 +636,7 @@ button.card:hover{border-color:var(--accent)}
   Object.keys(KNAME).forEach(function(k){HASHK[KNAME[k]]=+k});
   var LX=new Float32Array(N),LY=new Float32Array(N),LS=new Float32Array(N),LA=new Float32Array(N),LR=new Float32Array(N),LG=new Float32Array(N),LB=new Float32Array(N);
   var FX=new Float32Array(N),FY=new Float32Array(N),FS=new Float32Array(N),FA=new Float32Array(N),FR=new Float32Array(N),FG=new Float32Array(N),FB=new Float32Array(N);
-  var blendT=-1,drawn=false,BLEND=650;
+  var blendT=-1,drawn=false,BLEND=1300;
   function jump(k){
     var md=document.getElementById('modal');if(md&&!md.hidden)md.hidden=true;
     if(drawn&&!reduce){FX.set(LX);FY.set(LY);FS.set(LS);FA.set(LA);FR.set(LR);FG.set(LG);FB.set(LB);blendT=performance.now()}
@@ -761,7 +761,7 @@ button.card:hover{border-color:var(--accent)}
     // Ease toward the real scroll position so wheel steps never make the records jump.
     // Ease toward the real scroll position at the same speed on every screen refresh rate.
     var dt=lastT?Math.min(64,now-lastT):16;lastT=now;
-    if(pS<0||reduce)pS=p;else{var dp=p-pS;pS+=Math.abs(dp)<.00002?dp:dp*(1-Math.exp(-dt/95))}
+    if(pS<0||reduce)pS=p;else{var dp=p-pS;pS+=Math.abs(dp)<.00002?dp:dp*(1-Math.exp(-dt/430))}
     var q0=pS;paint(q0);
     var narrow=W<820,k=narrow?Math.min(W/760,Hh/1650):Math.min(W/1350,Hh/740);
     // On phones the database sits clear of the top bar, above the text.
